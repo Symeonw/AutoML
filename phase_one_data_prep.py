@@ -1,9 +1,8 @@
-# import time
-# start_time = time.time()
+import time
+start_time = time.time()
 import pandas as pd
 import numpy as np
 from scipy.stats import median_absolute_deviation as MAD
-pd.set_option('display.float_format', lambda x: '%.5f' % x) #Remove prior to moving to production
 
 df = pd.read_csv("test_data/IBM_Data.csv")
 user_input = [0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0]
@@ -36,14 +35,31 @@ def phase_one_data_preparation(data_file, user_input, event_record_path):
     [df.drop(columns=[col[1]], inplace=True) for col in dropped_col]
     #----------------------------------------------------------------------
     #Identifies and handels outliers
-    cont_cols = df.select_dtypes(exclude=["category"]).columns # Gets continous columns
-    cont_cols
-    x = df.DailyRate.value_counts(normalize=True, ascending=False, dropna=True).head(1).reset_index().to_numpy()
-    x
+#     cont_cols = df.select_dtypes(exclude=["category"]).columns # Gets continous columns
+#     cont_cols
+#     x = df.DailyRate.value_counts(normalize=True, ascending=False, dropna=True).head(1).reset_index().to_numpy()[0]
+#     for col in cont_cols::
+#         x = df[col].value_counts(normaized=True, ascending=False, dropna=True).head(1).reset_index().to_numpy()[0]
+#         if x[1] > 0.5:
+#             testset = df.[col][~df.[col].isin([x[0]])]
+
+
+ 
+# df.DailyRate[~df.DailyRate.isin([x[0]])]
+
+    
+
+
 
 
     return df
 
+
+
+
+df = phase_one_data_preparation(df, user_input,"test_data/user_record.txt")
+        .to_parqet("test_data/Phase_one.csv", index=False)****
+print("--- %s seconds ---" % (time.time() - start_time))
 
 
 
