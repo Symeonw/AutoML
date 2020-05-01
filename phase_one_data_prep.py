@@ -1,5 +1,5 @@
-import time
-start_time = time.time()
+# import time
+# start_time = time.time()
 import pandas as pd
 import numpy as np
 from scipy.stats import median_absolute_deviation as MAD
@@ -15,7 +15,11 @@ for col in df.columns:
 
 
 
-def phase_one_data_preparation(data_file, user_input, event_record_path):
+def phase_one_data_preparation(data_file: "CSV File", user_input: "Python List", event_record_path:"Relative Path") -> "CSV File":
+    """Drops columns with >= 50% of values missing unless column has >= 1000 rows,
+    identifies and handels outliers using modified z-socring and assigns categorical variables
+    as per customer specification.  
+    """
     # Changes column types to category and float based off of user input
     df = data_file.copy()
     for column_type, col in zip(user_input,df.columns):
@@ -35,34 +39,38 @@ def phase_one_data_preparation(data_file, user_input, event_record_path):
     [df.drop(columns=[col[1]], inplace=True) for col in dropped_col]
     #----------------------------------------------------------------------
     #Identifies and handels outliers
-#     cont_cols = df.select_dtypes(exclude=["category"]).columns # Gets continous columns
-#     cont_cols
-#     x = df.DailyRate.value_counts(normalize=True, ascending=False, dropna=True).head(1).reset_index().to_numpy()[0]
-#     for col in cont_cols::
-#         x = df[col].value_counts(normaized=True, ascending=False, dropna=True).head(1).reset_index().to_numpy()[0]
-#         if x[1] > 0.5:
-#             testset = df.[col][~df.[col].isin([x[0]])]
+    cont_cols = df.select_dtypes(exclude=["category"]).columns # Gets continous columns
+    cont_cols
+    x = df.DailyRate.value_counts(normalize=True, ascending=False, dropna=True).head(1).reset_index().to_numpy()[0]
+    for col in cont_cols:
+        x = df[col].value_counts(normaized=True, ascending=False, dropna=True).head(1).reset_index().to_numpy()[0]
+        if x[1] > 0.5:
+            testset = df.[col][~df.[col].isin([x[0]])]
 
 
  
-# df.DailyRate[~df.DailyRate.isin([x[0]])]
+    def modified_zscore(col: pd.Series) -> pd.Series:
+        med_col = col.median()
+        med_abs_dev = MAD(col)
+        mod_z = 0.6745*((col- med_col)/med_abs_dev)
+        return np.abs(mod_z)
+df2 = df.copy()
+    def identify_and_handel_outliers():
+        for cols in cont_cols:
+            df2[f"{col}_mod_ z"] = modified_zscore(df[col])
+            df2[df2[f"{col}_mod_z"] < 3]
 
-    
-
-
-
+        mod_z = (MAD(df.DailyRate) - df.DailyRate.median())/(1.486*MAD(df.DailyRate))
+        mod_z = 0.6745*((df.DailyRate - df.DailyRate.median())/MAD(df.DailyRate))
+        df["mod_z"] = mod_z
+        df[np.abs(df.mod_z) < .5]
 
     return df
 
 
-
+mod_z.__annotations__
 
 df = phase_one_data_preparation(df, user_input,"test_data/user_record.txt")
         .to_parqet("test_data/Phase_one.csv", index=False)****
 print("--- %s seconds ---" % (time.time() - start_time))
 
-
-
-df = phase_one_data_preparation(df, user_input,"test_data/user_record.txt")
-        .to_parqet("test_data/Phase_one.csv", index=False)****
-# print("--- %s seconds ---" % (time.time() - start_time))
