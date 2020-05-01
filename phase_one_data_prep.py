@@ -1,16 +1,6 @@
-import time
-start_time = time.time()
 import pandas as pd
 import numpy as np
 from scipy.stats import median_absolute_deviation as MAD
-df = pd.read_csv("test_data/IBM_Data.csv")
-user_input = [0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0]
-for col in df.columns:
-    if col == "Age":
-        df.loc[df.sample(frac=0.5).index, col] = pd.np.nan #Makes fake Nan's
-    if col == "Education":
-        df.loc[df.sample(frac=0.7).index, col] = pd.np.nan #Makes fake Nan's
-    
 
 
 def phase_one_data_preparation(data_file: pd.DataFrame , user_input: list, event_record_path:"Relative Path") -> "Parquet File":
@@ -68,9 +58,4 @@ def phase_one_data_preparation(data_file: pd.DataFrame , user_input: list, event
     identify_and_handel_outliers()
     record.close() #closes record
     return df
-
-df = phase_one_data_preparation(df, user_input,"test_data/user_record.txt")
-
-print("--- %s seconds ---" % (time.time() - start_time))
-
 
