@@ -1,9 +1,8 @@
-# import time
-# start_time = time.time()
+import time
+start_time = time.time()
 import pandas as pd
 import numpy as np
 from scipy.stats import median_absolute_deviation as MAD
-
 df = pd.read_csv("test_data/IBM_Data.csv")
 user_input = [0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0]
 for col in df.columns:
@@ -11,8 +10,7 @@ for col in df.columns:
         df.loc[df.sample(frac=0.5).index, col] = pd.np.nan #Makes fake Nan's
     if col == "Education":
         df.loc[df.sample(frac=0.7).index, col] = pd.np.nan #Makes fake Nan's
-
-
+    
 
 
 def phase_one_data_preparation(data_file: pd.DataFrame , user_input: list, event_record_path:"Relative Path") -> "Parquet File":
@@ -22,8 +20,8 @@ def phase_one_data_preparation(data_file: pd.DataFrame , user_input: list, event
     """
     # Changes column types to category and float based off of user input
     df = data_file
-    [df[col].astype("category") if columnn_type == 1 else df[col].astype(float)\
-         for col, column_type in zip(user_input, df.columns) ]
+    type_list = ["category" if u_input == 1 else float for u_input in user_input]
+    df = df.astype(dict(zip(df.columns, type_list)))
     #-------------------------------------------------
     # Drops columns with over 50% of data missing, adds event to record.
     col_nan_pct = df.isin([' ',np.nan]).mean() #Calculates percent of Nans
@@ -33,50 +31,46 @@ def phase_one_data_preparation(data_file: pd.DataFrame , user_input: list, event
     record = open(event_record_path, "a+")
     [record.write(f"{col[1]} dropped due to more than 50% of data missing and less than 1000 rows of data: actual data consisted of {col[0]} values.\r") for col in dropped_col]
     [df.drop(columns=[col[1]], inplace=True) for col in dropped_col]
-    #----------------------------------------------------------------------
-    #Identifies and handels outliers
-    cont_cols = df.select_dtypes(exclude=["category"]).columns # Gets continous columns    
 
+    #----------------------------------------------------------------------
+    #Identifies and handels outliers  
     def modified_zscore(col: pd.Series) -> pd.Series:
         """Makes calulations for Modified Z-Score"""
         med_col = col.median()
         med_abs_dev = MAD(col)
         mod_z = 0.6745*((col- med_col)/med_abs_dev)
         return np.abs(mod_z)
+
+
     def identify_and_handel_outliers():
         """This function measures the percentange amount that a value occurs, if it occurs over 50% of a given column
-        that value is removed and the remaining values are tested for outliars with any outside 3 MAD being dropped."""
+        that value is removed and the remaining values are tested for outliars with any outside 3 Modified Z-Score."""
         col_list = []
         df_len = len(df)
+        cont_cols = df.select_dtypes(exclude=["category"]).columns # Gets continous columns  
         for col in cont_cols:
-            top_value = df[col].value_counts(normalized=True, ascending=False, dropna=True)\
+            top_value = df[col].value_counts(normalize=True, ascending=False, dropna=True)\
                 .head(1).reset_index().to_numpy()[0] #Gets the top occuring value along with its percentage of occurances
-                if top_value[1] > 0.5:#Test if the top occuring value makes up more than 50% of the data
-                    col = df.[col][~df.[col].isin([x[0]])] #Gets all values not within the 50% of single value data
-            df[f"{col}_mod_z"] = modified_zscore(df[col])
-            df[df[f"{col}_mod_z"] > 3]
-            col_list.append(f"{col}_mod_z")
-        df.drop(columns = col_list, inplace=True)
-
+            if top_value[1] > 0.5:#Test if the top occuring value makes up more than 50% of the data
+                remaining_col = df[col][~df[col].isin([top_value[0]])] #Gets all values not within the 50% of single value data
+                df[f"{col}_mod_z"] = modified_zscore(remaining_col) #Gets modified z-score for remaining items
+                df[f"{col}_mod_z"] = df[f"{col}_mod_z"].fillna(0) #Fills all missing z-scores\
+                    #with zero(because that 50% of data removed would be zero anyways)
+                df[df[f"{col}_mod_z"] > 3] #Removed all values outside 3 
+                col_list.append(f"{col}_mod_z")#Appends name of column to list
+            else:
+                df[f"{col}_mod_z"] = modified_zscore(df[col]) #Gets modified z-score 
+                df[df[f"{col}_mod_z"] > 3] #Removed all values outside 3 
+                col_list.append(f"{col}_mod_z")#Appends name of column to list
+        df.drop(columns = col_list, inplace=True)#Removed columns created to test modified z-score
+        df_diff = df_len - len(df)
+        record.write(f"{df_diff} outliers detected and dropped\r")
+    identify_and_handel_outliers()
     record.close() #closes record
     return df
 
-
-mod_z.__annotations__
-
 df = phase_one_data_preparation(df, user_input,"test_data/user_record.txt")
-        .to_parqet("test_data/Phase_one.csv", index=False)****
 
-
-
-import time
-start_time = time.time()
-col_list = []
-for col in cont_cols:
-    df[f"{col}_mod_z"] = modified_zscore(df[col])
-    df[df[f"{col}_mod_z"] > 3]
-    col_list.append(f"{col}_mod_z")
-    df.drop(columns = col_list, inplace=True)
 print("--- %s seconds ---" % (time.time() - start_time))
 
 
