@@ -20,8 +20,8 @@ print(x[2]/100)
 y[1]
 
 df40 = df[df.Age > 35]
-df40.Age.sample(50).hist()
-y = anderson(df40.Age.sample(30))
+df40.PercentSalaryHike.sample(50).hist()
+y = anderson(df40.PercentSalaryHike.sample(30))
 
 print(y[0])
 print(y[1])
@@ -29,12 +29,12 @@ print(y[2]/100)
 
 shapiro(df.Age)
 shapiro(df.Age.sample(50))
-shapiro(df40.Age)
+shapiro(df40.PercentSalaryHike)
 
 lilliefors(df.Age)
 lilliefors(df.Age.sample(50))
-lilliefors(df40.Age)
-lilliefors(df40.Age.sample(50))
+lilliefors(df40.PercentSalaryHike)
+lilliefors(df40.PercentSalaryHike.sample(50))
 
 
 
@@ -45,34 +45,34 @@ import matplotlib.pyplot as plt
 from scipy.stats import kurtosis
 anderson_statistic_30 = []
 for i in range(1,1000):
-    anderson_statistic_30.append(anderson(df40.Age.sample(30))[0])
+    anderson_statistic_30.append(anderson(df40.PercentSalaryHike.sample(30))[0])
 
 sns.distplot(anderson_statistic_30)
 
 
 anderson_statistic_50 = []
 for i in range(1,1000):
-    anderson_statistic_50.append(anderson(df40.Age.sample(50))[0])
+    anderson_statistic_50.append(anderson(df40.PercentSalaryHike.sample(50))[0])
 
 sns.distplot(anderson_statistic_50)
 
 
 anderson_statistic_100 = []
 for i in range(1,1000):
-    anderson_statistic_100.append(anderson(df40.Age.sample(100))[0])
+    anderson_statistic_100.append(anderson(df40.PercentSalaryHike.sample(100))[0])
 
 sns.distplot(anderson_statistic_100)
 
 anderson_statistic_200 = []
 for i in range(1,1000):
-    anderson_statistic_200.append(anderson(df40.Age.sample(200))[0])
+    anderson_statistic_200.append(anderson(df40.PercentSalaryHike.sample(200))[0])
 
 sns.distplot(anderson_statistic_200)
 
 
 anderson_statistic_500 = []
 for i in range(1,1000):
-    anderson_statistic_500.append(anderson(df40.Age.sample(500))[0])
+    anderson_statistic_500.append(anderson(df40.PercentSalaryHike.sample(500))[0])
 
 sns.distplot(anderson_statistic_500)
 
@@ -94,7 +94,7 @@ for i in range(1,1000):
 
 
 
-df
+
 
 anderson_statistic_100 = []
 anderson_critical_100 = []
@@ -142,6 +142,15 @@ sns.distplot(anderson_statistic_200)
 plt.axvline(anderson_critical_200)
 sns.distplot(anderson_statistic_500)
 plt.axvline(anderson_critical_500)
+plt.title("Non-Normal Distribution (Right Skewed)")
+
+sns.distplot(df.Age)
+
+new_list = []
+
+for i in range(1, 1000):
+    new_list.append(df.DailyRate.sample(100, replace=True).mean())
+sns.distplot(pd.Series(new_list))
 
 
 
