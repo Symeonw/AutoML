@@ -142,17 +142,7 @@ sns.distplot(anderson_statistic_200)
 plt.axvline(anderson_critical_200)
 sns.distplot(anderson_statistic_500)
 plt.axvline(anderson_critical_500)
-plt.title("Non-Normal Distribution (Right Skewed)")
-
-sns.distplot(df.Age)
-
-new_list = []
-
-for i in range(1, 1000):
-    new_list.append(df.DailyRate.sample(100, replace=True).mean())
-sns.distplot(pd.Series(new_list))
-
-
+plt.title("Normal Distribution")
 
 
 print(kurtosis(anderson_statistic_30))
@@ -170,3 +160,98 @@ sum(anderson_statistic_50)/1000
 
 
 sns.distplot(df.Age)
+
+
+# CDF TESTING
+df.Age.hist(cumulative=True)
+df.Age.describe()[1]
+
+import numpy as np
+from scipy.stats import norm
+x = np.linespace(-5,5,5000)
+cdf_graph = norm.cdf(x,df.Age.describe()[1], df.Age.describe()[2])
+
+sns.lineplot(x, cdf_graph, label="cdf")
+
+df2 = pd.DataFrame(df.Age.value_counts())
+df2.reset_index(inplace=True)
+df2.rename(columns={"index":"value", "Age":"frequency"}, inplace=True)
+df2["pdf"] = df2.frequency / sum(df2.frequency)
+df2["cdf"] = df2.pdf.cumsum()
+ 
+norm_dist_cdf = norm.cdf(x,df.Age.describe()[1], df.Age.describe()[2])
+len(norm_dist_cdf)
+len(df2.cdf)
+solution = np.abs(norm_dist_cdf - df2.cdf)
+
+
+#----------------------------------------------------------------------------
+# ANDERSON-DARLING TESTING
+
+#Min/Max testing on normal dist - sampled
+
+anderson_statistic_30 = []
+anderson_critical_30 = []
+anderson_critical_30.append(anderson(df.Age.sample(30))[1][4])
+for i in range(1,1000):
+    anderson_statistic_30.append(anderson(df.Age.sample(30))[0])
+
+
+
+anderson_statistic_50 = []
+anderson_critical_50 = []
+anderson_critical_50.append(anderson(df.Age.sample(50))[1][4])
+for i in range(1,1000):
+    anderson_statistic_50.append(anderson(df.Age.sample(50))[0])
+
+
+
+
+
+anderson_statistic_100 = []
+anderson_critical_100 = []
+anderson_critical_100.append(anderson(df.Age.sample(100))[1][4])
+for i in range(1,1000):
+    anderson_statistic_100.append(anderson(df.Age.sample(100))[0])
+
+
+anderson_statistic_150 = []
+anderson_critical_150 = []
+anderson_critical_150.append(anderson(df.Age.sample(150))[1][4])
+for i in range(1,1000):
+    anderson_statistic_150.append(anderson(df.Age.sample(150))[0])
+
+
+
+
+anderson_statistic_200 = []
+anderson_critical_200 = []
+anderson_critical_200.append(anderson(df.Age.sample(200))[1][4])
+for i in range(1,1000):
+    anderson_statistic_200.append(anderson(df.Age.sample(200))[0])
+
+
+
+
+
+anderson_statistic_500 = []
+anderson_critical_500 = []
+anderson_critical_500.append(anderson(df.Age.sample(500))[1][4])
+for i in range(1,1000):
+    anderson_statistic_500.append(anderson(df.Age.sample(500))[0])
+    
+
+
+sns.distplot(anderson_statistic_30)
+plt.axvline(anderson_critical_30)
+sns.distplot(anderson_statistic_50)
+plt.axvline(anderson_critical_50)
+sns.distplot(anderson_statistic_100)
+plt.axvline(anderson_critical_100)
+sns.distplot(anderson_statistic_150)
+plt.axvline(anderson_critical_150)
+sns.distplot(anderson_statistic_200)
+plt.axvline(anderson_critical_200)
+sns.distplot(anderson_statistic_500)
+plt.axvline(anderson_critical_500)
+plt.title("Normal Distribution")
