@@ -234,6 +234,7 @@ test_anderson(df.Age,1)
 test_anderson(df.DailyRate,0)
 test_anderson(df40.Age,0)
 test_anderson(df.DistanceFromHome,0)
+test_anderson(df40inv.Age, 0)
 
 
 df.columns
