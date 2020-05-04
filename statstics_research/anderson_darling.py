@@ -7,10 +7,13 @@ import matplotlib.pyplot as plt
 from math import sqrt
 import seaborn as sns
 import pandas as pd
+import numpy as np
 
 
 df = pd.read_csv("test_data/IBM_Data.csv")
 df40 = df[df.Age > 35]
+df40inv = df[df.Age < 35]
+
 
 
 
@@ -83,7 +86,6 @@ plt.title("Normal Distribution")
 
 
 from scipy.stats import gaussian_kde
-import numpy as np
 xs = np.linspace(0,8,200)
 
 # Anderson 30 sample size
@@ -198,7 +200,7 @@ plt.title("Non-Normal Distribution")
 anderson_30 = pd.DataFrame(anderson_statistic_30, columns=["test_stat"])
 len(anderson_30[anderson_30.test_stat < anderson_critical_30[0]]) / len(anderson_30)
 
-def test_anderson(dfi:pd.Series, dist_type:"1 == Normal, 0 == Non-Normal",graph_name, sample_sizes = [30,50,100,150,200,500]):
+def test_anderson(dfi:pd.Series, dist_type:"1 == Normal, 0 == Non-Normal", sample_sizes = [30,50,100,150,200,500]):
     results = {}
     for ss in sample_sizes:
         anderson_statistic_list = []
@@ -209,7 +211,7 @@ def test_anderson(dfi:pd.Series, dist_type:"1 == Normal, 0 == Non-Normal",graph_
     for ss in sample_sizes:
         sns.distplot(results[f"anderson_statistic_{ss}"])
         plt.axvline(results[f"anderson_critical_{ss}"])
-        plt.title(f"{graph_name} Distribution")
+        plt.title(f"Anderson-Darling Test Results")
     plt.show()
     sns.distplot(dfi)
     plt.title("Original Data Distribution")
@@ -218,7 +220,7 @@ def test_anderson(dfi:pd.Series, dist_type:"1 == Normal, 0 == Non-Normal",graph_
         critical = results[f"anderson_critical_{ss}"]
         data = pd.DataFrame(data, columns=["test_statistic"])
         if dist_type == 1:
-            pct_critical = len(data[data.test_statistic < critical]) / len(data)
+            pct_critical = len(data[data.test_statistic > critical]) / len(data)
             print(f"Sample size {ss}: {pct_critical*100}% of data misclassified non-normal\r")
         if dist_type == 0:
             pct_critical = len(data[data.test_statistic < critical]) / len(data)
@@ -227,6 +229,17 @@ def test_anderson(dfi:pd.Series, dist_type:"1 == Normal, 0 == Non-Normal",graph_
 
 
 
-test_anderson(df.DistanceFromHome,0, "Non-Normal Distribution")
+test_anderson(pd.Series(x),1)
+test_anderson(df.Age,1)
+test_anderson(df.DailyRate,0)
+test_anderson(df40.Age,0)
+test_anderson(df.DistanceFromHome,0)
 
-df.DistanceFromHome.hist()
+
+df.columns
+
+
+mu,sigma,n = 0.,1.,1000
+x = np.random.normal(mu,sigma,n) 
+sns.distplot(x)
+
