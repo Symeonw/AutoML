@@ -14,6 +14,7 @@ df = pd.read_csv("test_data/IBM_Data.csv")
 df40 = df[df.Age > 35]
 df40inv = df[df.Age < 35]
 
+df2 = pd.read_csv("test_data/house_data.csv")
 
 
 
@@ -244,3 +245,39 @@ mu,sigma,n = 0.,1.,1000
 x = np.random.normal(mu,sigma,n) 
 sns.distplot(x)
 
+df2 = df2[df2.LotArea < 20000]
+df2.LotArea.hist()
+
+
+#T-Tessting Distributions
+from scipy.stats import ttest_ind
+def test_anderson(dfi:pd.Series, dist_type:"1 == Normal, 0 == Non-Normal", sample_sizes = [30,50,100,150,200,500]):
+    results = {}
+    for ss in sample_sizes:
+        anderson_statistic_list = []
+        results.update({f"anderson_critical_{ss}":anderson(dfi.sample(ss))[1][4]})
+        for i in range(1,1000):
+            anderson_statistic_list.append(anderson(dfi.sample(ss))[0])
+        results.update({f"anderson_statistic_{ss}":anderson_statistic_list})
+    for ss in sample_sizes:
+        sns.distplot(results[f"anderson_statistic_{ss}"])
+        plt.axvline(results[f"anderson_critical_{ss}"])
+        plt.title(f"Anderson-Darling Test Results")
+    plt.show()
+    sns.distplot(dfi)
+    plt.title("Original Data Distribution")
+    for ss in sample_sizes:
+        data = results[f"anderson_statistic_{ss}"]
+        critical = results[f"anderson_critical_{ss}"]
+        data = pd.DataFrame(data, columns=["test_statistic"])
+        if dist_type == 1:
+            pct_critical = len(data[data.test_statistic > critical]) / len(data)
+            print(f"Sample size {ss}: {pct_critical*100}% of data misclassified non-normal\r")
+            ttest_data = 
+        if dist_type == 0:
+            pct_critical = len(data[data.test_statistic < critical]) / len(data)
+            print(f"Sample size {ss}: {pct_critical*100}% of data misclassified normal\r")
+
+    return results
+
+anderson_statistic_30
