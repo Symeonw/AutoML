@@ -16,9 +16,8 @@ df = pd.read_csv("../test_data/IBM_Data.csv")
 df40 = df[df.Age > 35]
 df40inv = df[df.Age < 35]
 df2 = pd.read_csv("../test_data/house_data.csv")
-dfbank = pd.read_csv("../test_data/bank_data.csv", sep=';', lineterminator='\r')
+df3 = pd.read_csv("../test_data/medical_data.csv")
 
-dfbank
 
 
 
@@ -255,12 +254,18 @@ test_anderson(df.DistanceFromHome,0)
 test_anderson(df40inv.Age, 0)
 test_anderson(df2.LotArea, 1)
 test_anderson(df2.LotFrontage, 1)
+test_anderson(df3.age, 1, sample_sizes=[30,50,100,150,200])
+test_anderson(df3.trestbps, 1, sample_sizes=[30,50,100,150,200])
+test_anderson(df3.thalach, 1, sample_sizes=[30,50,100,150,200])
 
-dfbank.columns
+from scipy.stats import shapiro
 
-dfbank
+shapiro(df.Age.sample(100))
 
-
+def test_shapiro(dfi:pd.Series, dist_type:"1 == Normal, 0 == Non-Normal", sample_sizes = [30,50,100,150,200,500]):
+    results = {}
+    for ss in sample_sizes:
+        
 
 
 

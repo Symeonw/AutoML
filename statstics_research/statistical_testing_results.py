@@ -45,3 +45,16 @@
 100; 14.3%; non-normal;
 150; 30.5%; non-normal;
 200; 53.4%; non-normal;
+30; 9.5%; non-normal
+50; 17.2%; non-normal
+100; 50.1%; non-normal
+150; 81.8%; non-normal
+200; 99.2%; non-normal
+30; 7.4%; non-normal
+50; 13.6%; non-normal
+100; 40.3%; non-normal
+150; 71.0%; non-normal
+200; 94.0%; non-normal
+
+
+

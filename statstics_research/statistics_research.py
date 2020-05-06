@@ -1,6 +1,8 @@
 import pandas as pd
 
-df = pd.read_csv("test_data/IBM_Data.csv")
+
+df = pd.read_csv("../test_data/IBM_Data.csv")
+
 
 from scipy.stats import anderson
 from scipy.stats import shapiro
