@@ -45,3 +45,22 @@ model.train(X, y, epochs=40)
 plt.scatter(X, y, label ="data")
 plt.plot(X, model.predict(X), "r-", label="predicted")
 plt.legend()
+
+
+import pandas as pd 
+data = pd.read_csv("AB.csv").sample(frac=1)
+df = df.copy()
+df = df[["neighbourhood_group", "room_type", "minimum_nights", "number_of_reviews", "reviews_per_month",\
+    "calculated_host_listings_count", "availability_365"]]
+df.reviews_per_month.fillna(0, inplace=True)
+
+onehot_neighbourhood_group = pd.get_dummies(df.neighbourhood_group)
+onehot_room_type = pd.get_dummies(df.room_type)
+
+df.drop(columns=["neighbourhood_group", "room_type"], inplace=True)
+df = pd.concat([df, onehot_neighbourhood_group, onehot_room_type], axis=1)
+target = data.price
+
+train_size = int(0.7*len(data))
+X_train, X_test = df.values[:train_size, :], df.values[train_size:, :]
+y_train, y_test = target.values[:train_size], target.values[train_size]

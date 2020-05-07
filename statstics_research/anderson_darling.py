@@ -16,9 +16,10 @@ df = pd.read_csv("../test_data/IBM_Data.csv")
 df40 = df[df.Age > 35]
 df40inv = df[df.Age < 35]
 df2 = pd.read_csv("../test_data/house_data.csv")
+df2.isnull().sum()
 df3 = pd.read_csv("../test_data/medical_data.csv")
 
-
+df3
 
 
 
