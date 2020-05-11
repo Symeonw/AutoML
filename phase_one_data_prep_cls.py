@@ -59,9 +59,10 @@ class phase_one_data_prep:
         that value is removed and the remaining values are tested for outliars with any outside 3 Modified Z-Score."""
         col_list = [] # This will hold the column names created for the administration of the modified z-score test
         df_len = len(self.df)
-        print(df_len)
         cont_cols = self.df.select_dtypes(exclude=["category"]).columns # Gets continous columns  
         for col in cont_cols:
+            print(len(self.df))
+            print(col)
             top_value = self.df[col].value_counts(normalize=True, ascending=False, dropna=True)\
                 .head(1).reset_index().to_numpy()[0] #Gets the top occuring value along with its percentage of occurances
             if top_value[1] > 0.5:#Test if the top occuring value makes up more than 50% of the data
@@ -69,26 +70,16 @@ class phase_one_data_prep:
                 self.df[f"{col}_mod_z"] = phase_one_data_prep.modified_zscore(remaining_col) #Gets modified z-score for remaining items
                 self.df[f"{col}_mod_z"] = self.df[f"{col}_mod_z"].fillna(0) #Fills all missing z-scores\
                     #with zero(because that 50% of data removed would be zero anyways)
-                self.df[self.df[f"{col}_mod_z"] < 3] #Removed all values outside 3 
+                self.df = self.df[self.df[f"{col}_mod_z"] < 3] #Removed all values outside 3
                 col_list.append(f"{col}_mod_z")#Appends name of column to list
             else:
-                self.df[f"{col}_mod_z"] = phase_one_data_prep.modified_zscore(df[col]) #Gets modified z-score 
-                self.df[self.df[f"{col}_mod_z"] < 3] #Removed all values outside 3 
+                self.df[f"{col}_mod_z"] = phase_one_data_prep.modified_zscore(self.df[col]) #Gets modified z-score 
+                self.df = self.df[self.df[f"{col}_mod_z"] < 3] #Removed all values outside 3
                 col_list.append(f"{col}_mod_z")#Appends name of column to list
         self.df.drop(columns = col_list, inplace=True)#Removed columns created to test modified z-score
         self.outliers_dropped = df_len - len(self.df)
-        print(df_len)
+        print(len(self.df))
 
-
-df.select_dtypes(exclude=["category"]).columns
-top_value = df["Age"].value_counts(normalize=True, ascending=False, dropna=True)\
-                .head(1).reset_index().to_numpy()[0]
-remaining_col = df["Age"][~df["Age"].isin([top_value[0]])]
-df["Age_mod_z"] = phase_one_data_prep.modified_zscore(remaining_col)
-df.Age_mod_z
-df[df.Age_mod_z < 3]
-phase_one_data_prep.modified_zscore(remaining_col)
-df
 
 
 test = phase_one_data_prep(df, "AFH6G7W", user_input)
@@ -98,11 +89,5 @@ test.handel_nans()
 test.dropped_cols_phase_one
 test.identify_and_handel_outliers()
 test.outliers_dropped
-x = pd.DataFrame(test.df.types).reset_index()
-x.columns = ["column_name", "dtype"]
-x.dtype = x.dtype.astype(str)
-xd = {list(x.column_name)[i]:list(x.dtype)[i] for i in range(len(x))}
-xd["Attrition"]
 
-drop = ["Age", "DailyRate"]
-[xd.pop(item) for item in drop]
+
