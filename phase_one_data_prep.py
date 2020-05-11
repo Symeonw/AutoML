@@ -4,7 +4,7 @@ from scipy.stats import median_absolute_deviation as MAD
 
 
 def phase_one_data_preparation(data_file: pd.DataFrame , user_input: list, event_record_path:"Relative Path") -> "Parquet File":
-    """Drops columns with >= 50% of values missing unless column has >= 1000 rows,
+    """Drops columns with >= 50% of values missing unless column has >= 50 rows,
     identifies and handels outliers using modified z-socring and assigns categorical variables
     as per customer specification.  
     """
@@ -17,15 +17,16 @@ def phase_one_data_preparation(data_file: pd.DataFrame , user_input: list, event
     col_nan_pct = df.isin([' ',np.nan]).mean() #Calculates percent of Nans
     col_names = col_nan_pct[col_nan_pct >= .1].index # Gets name of columns with over 50% Nans
     col_count = [df[col].count() for col in col_names for x in df if x == col]  #Gets length of valid values for column
-    dropped_col = [col for col in zip(col_count, col_names) if col[0] <= 1000] #Gets columns names with under 1000 values
+    dropped_col = [col for col in zip(col_count, col_names) if col[0] <= 50] #Gets columns names with under 50 values
     record = open(event_record_path, "a+")
-    [record.write(f"{col[1]} dropped due to more than 50% of data missing and less than 1000 rows of data: actual data consisted of {col[0]} values.\r") for col in dropped_col]
+    [record.write(f"{col[1]} dropped due to more than 50% of data missing and less than 50 rows of data: actual data consisted of {col[0]} values.\r") for col in dropped_col]
     [df.drop(columns=[col[1]], inplace=True) for col in dropped_col]
 
     #----------------------------------------------------------------------
     #Identifies and handels outliers  
     def modified_zscore(col: pd.Series) -> pd.Series:
         """Makes calulations for Modified Z-Score"""
+        col = col.dropna()
         med_col = col.median()
         med_abs_dev = MAD(col)
         mod_z = 0.6745*((col- med_col)/med_abs_dev)
@@ -46,11 +47,11 @@ def phase_one_data_preparation(data_file: pd.DataFrame , user_input: list, event
                 df[f"{col}_mod_z"] = modified_zscore(remaining_col) #Gets modified z-score for remaining items
                 df[f"{col}_mod_z"] = df[f"{col}_mod_z"].fillna(0) #Fills all missing z-scores\
                     #with zero(because that 50% of data removed would be zero anyways)
-                df[df[f"{col}_mod_z"] > 3] #Removed all values outside 3 
+                df[df[f"{col}_mod_z"] < 3] #Removed all values outside 3 
                 col_list.append(f"{col}_mod_z")#Appends name of column to list
             else:
                 df[f"{col}_mod_z"] = modified_zscore(df[col]) #Gets modified z-score 
-                df[df[f"{col}_mod_z"] > 3] #Removed all values outside 3 
+                df[df[f"{col}_mod_z"] < 3] #Removed all values outside 3 
                 col_list.append(f"{col}_mod_z")#Appends name of column to list
         df.drop(columns = col_list, inplace=True)#Removed columns created to test modified z-score
         df_diff = df_len - len(df)
