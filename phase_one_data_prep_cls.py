@@ -58,11 +58,10 @@ class phase_one_data_prep:
         """This function measures the percentange amount that a value occurs, if it occurs over 50% of a given column
         that value is removed and the remaining values are tested for outliars with any outside 3 Modified Z-Score."""
         col_list = [] # This will hold the column names created for the administration of the modified z-score test
-        df_len = len(self.df)
+        values_dropped = []
         cont_cols = self.df.select_dtypes(exclude=["category"]).columns # Gets continous columns  
         for col in cont_cols:
-            print(len(self.df))
-            print(col)
+            df_len = len(self.df)
             top_value = self.df[col].value_counts(normalize=True, ascending=False, dropna=True)\
                 .head(1).reset_index().to_numpy()[0] #Gets the top occuring value along with its percentage of occurances
             if top_value[1] > 0.5:#Test if the top occuring value makes up more than 50% of the data
@@ -72,13 +71,14 @@ class phase_one_data_prep:
                     #with zero(because that 50% of data removed would be zero anyways)
                 self.df = self.df[self.df[f"{col}_mod_z"] < 3] #Removed all values outside 3
                 col_list.append(f"{col}_mod_z")#Appends name of column to list
+                values_dropped.append((col, df_len - len(self.df)))
             else:
                 self.df[f"{col}_mod_z"] = phase_one_data_prep.modified_zscore(self.df[col]) #Gets modified z-score 
                 self.df = self.df[self.df[f"{col}_mod_z"] < 3] #Removed all values outside 3
                 col_list.append(f"{col}_mod_z")#Appends name of column to list
+                values_dropped.append((col, df_len - len(self.df)))
         self.df.drop(columns = col_list, inplace=True)#Removed columns created to test modified z-score
-        self.outliers_dropped = df_len - len(self.df)
-        print(len(self.df))
+        self.outliers_dropped = values_dropped
 
 
 
@@ -89,5 +89,8 @@ test.handel_nans()
 test.dropped_cols_phase_one
 test.identify_and_handel_outliers()
 test.outliers_dropped
+# To do tomorrow, refernce line 64/65 create record for columns and amounts dropped 
+
+
 
 
