@@ -89,8 +89,4 @@ test.handel_nans()
 test.dropped_cols_phase_one
 test.identify_and_handel_outliers()
 test.outliers_dropped
-# To do tomorrow, refernce line 64/65 create record for columns and amounts dropped 
-
-
-
 
