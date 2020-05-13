@@ -1,9 +1,13 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
+from scipy.stats import chi2
+from scipy.stats import ttest_ind
+from scipy.stats import chi2_contingency
 from scipy.stats import median_absolute_deviation as MAD
 
+
 df = pd.read_csv("test_data/IBM_Data.csv")
-user_column_input = [0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0]
+user_column_label = [0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0]
 for col in df.columns:
     if col == "Age":
         df.loc[df.sample(frac=0.5).index, col] = pd.np.nan #Makes fake Nan's
@@ -12,13 +16,6 @@ for col in df.columns:
 
 df.at[0, "Age"] = 200
 
-
-#Need documentation for the following:
-# self.df
-# 
-# self.column_dtypes
-# self.dropped_cols_phase_one
-# self.outliers_dropped: Amount of rows dropped due to outliers occuring in a given column. 
 class phase_one_data_prep:
 
     def __init__(self, data_file, user_id, user_column_label, user_target_label):
@@ -89,12 +86,7 @@ class phase_one_data_prep:
         self.identify_and_handel_outliers()
 
 
-
-test = phase_one_data_prep(df, "AFH6G7W", user_column_input)
-
-test.assign_column_types()
-test.handel_nans()
+test = phase_one_data_prep(df, "AFH6G7W", user_column_label, "Age")
+test.execute_phase_one()
 test.dropped_cols_phase_one
-test.identify_and_handel_outliers()
-test.outliers_dropped
 

@@ -1,33 +1,9 @@
-import pandas as pd 
 from scipy.stats import ttest_ind
-
 from scipy.stats import chi2_contingency
 from scipy.stats import chi2
-from scipy.stats import shapiro
-from math import sqrt
 import pandas as pd
 import numpy as np
 
-
-def check_normal_dist(df):
-    if len(df) >= 5000:
-        raise ValueError("Shaprio-Wilks test should be used on data less than 5000 values")
-    try:
-        df = df.loc[:, df.dtypes != "category"]
-    except:
-        df = pd.DataFrame(df)
-        df = df.loc[:, df.dtypes != "category"]
-    cols = df.columns.tolist()
-    n = 0
-    for col in cols:
-        stat, p = shapiro(df[col])
-        if p > 0.05:
-            n += 1
-            print(f"Not normally distributed: {col}")
-    if n > 0:
-        print(f"finished with {n} variables being not normally distributed")
-    else:
-        print("All variables are normally distributed.")
 
 def create_chi_table():
     p = np.array([0.995, 0.99, 0.975, 0.95, 0.90, 0.10, 0.05, 0.025, 0.01, 0.005])
@@ -47,3 +23,6 @@ def check_chi(var1,var2):
         print("These variables are independent, failed to reject H0.")
     else:
         print("These variables are dependent, H0 rejected.")
+
+
+class statistical_package
