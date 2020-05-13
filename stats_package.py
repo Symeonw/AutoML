@@ -24,5 +24,22 @@ def check_chi(var1,var2):
     else:
         print("These variables are dependent, H0 rejected.")
 
+df = pd.read_csv("test_data/IBM_Data.csv")
+user_column_label = [0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0]
 
-class statistical_package
+class statistical_package:
+
+    def __init__(self, data_file, column_dtypes, user_target_label):
+        del phase_one.df
+        self.df = data_file
+        self.column_dtypes = column_dtypes
+        del phase_one.column_dtypes
+        self.user_target_label = user_target_label
+
+        
+    def continuous_tests(self):
+        
+
+
+test = statistical_package(phase_one.df, user_column_label, "Attrition")
+phase_one.column_dtypes

@@ -86,7 +86,7 @@ class phase_one_data_prep:
         self.identify_and_handel_outliers()
 
 
-test = phase_one_data_prep(df, "AFH6G7W", user_column_label, "Age")
-test.execute_phase_one()
-test.dropped_cols_phase_one
+phase_one = phase_one_data_prep(df, "AFH6G7W", user_column_label, "Age")
+phase_one.execute_phase_one()
+phase_one.dropped_cols_phase_one
 
