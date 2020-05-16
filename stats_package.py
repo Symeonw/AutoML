@@ -26,20 +26,44 @@ def check_chi(var1,var2):
 
 df = pd.read_csv("test_data/IBM_Data.csv")
 user_column_label = [0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0]
+#Documentation
+    #cont_cols
+    #cat_cols
+    #
 
 class statistical_package:
 
     def __init__(self, data_file, column_dtypes, user_target_label):
-        del phase_one.df
+        #del phase_one.df
         self.df = data_file
-        self.column_dtypes = column_dtypes
-        del phase_one.column_dtypes
         self.user_target_label = user_target_label
-
+        self.cont_cols = list({key:value for (key,value) in column_dtypes.items() if value == "float64"}.keys())
+        self.cat_cols = list({key:value for (key,value) in column_dtypes.items() if value == "category"}.keys())
         
-    def continuous_tests(self):
-        
+    def continuous_tests_with_cat_target(self):
+        for cols in cont_cols:
 
 
-test = statistical_package(phase_one.df, user_column_label, "Attrition")
-phase_one.column_dtypes
+
+
+
+
+test = statistical_package(phase_one.df, phase_one.column_dtypes, "Attrition")
+test.cont_cols
+test.cat_cols
+
+for cols in test.cont_cols:
+    ttest_ind(test.df[cols], test.df.Attrition.cat.codes)
+
+    test.cont_cols
+
+test.df.DailyRate
+test.df.Attrition
+test.cat_cols
+test.df.JobLevel.cat.codes
+p = []
+for i in range(101):
+    p.append(ttest_ind(test.df.DailyRate.sample(50), test.df.WorkLifeBalance.cat.codes.sample(50))[1])
+
+pd.Series(p).describe()
+test.cont_cols
