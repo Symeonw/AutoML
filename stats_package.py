@@ -1,4 +1,4 @@
-from scipy.stats import ttest_ind
+from scipy.stats import ttest_rel
 from scipy.stats import chi2_contingency
 from scipy.stats import chi2
 import pandas as pd
@@ -41,9 +41,20 @@ class statistical_package:
         self.cat_cols = list({key:value for (key,value) in column_dtypes.items() if value == "category"}.keys())
         
     def continuous_tests_with_cat_target(self):
-        for cols in cont_cols:
+        self.ttest_results = {}
+        self.target = self.df[f"{user_target_label}"].cat.cols
+        for col in cont_cols:
+            if len(col.dropna()) >= 50:
+                results = ttest_ind(col, target)
 
 
+
+target = df2.Attrition.cat.codes
+
+
+target = df2.Attrition.cat.codes
+df2 = test.df.dropna()
+ttest_ind(target.sample(15), df2.Age.sample(15))
 
 
 
@@ -61,9 +72,14 @@ test.df.DailyRate
 test.df.Attrition
 test.cat_cols
 test.df.JobLevel.cat.codes
+
 p = []
 for i in range(101):
-    p.append(ttest_ind(test.df.DailyRate.sample(50), test.df.WorkLifeBalance.cat.codes.sample(50))[1])
+    p.append(ttest_rel(test.df.YearsAtCompany, test.df.EducationField.cat.codes)[1])
 
 pd.Series(p).describe()
-test.cont_cols
+
+df2.DailyRate.corr(df2.EducationField.cat.codes)
+
+check_chi(df2.Gender, df2.Department)
+check_chi(df2.Attrition, df2.BusinessTravel)
