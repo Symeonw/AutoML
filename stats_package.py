@@ -75,7 +75,7 @@ test.df.JobLevel.cat.codes
 
 p = []
 for i in range(101):
-    p.append(ttest_rel(test.df.YearsAtCompany, test.df.EducationField.cat.codes)[1])
+    p.append(ttest_rel(test.df.DistanceFromHome, test.df.Gender.cat.codes)[1])
 
 pd.Series(p).describe()
 
@@ -83,3 +83,4 @@ df2.DailyRate.corr(df2.EducationField.cat.codes)
 
 check_chi(df2.Gender, df2.Department)
 check_chi(df2.Attrition, df2.BusinessTravel)
+
