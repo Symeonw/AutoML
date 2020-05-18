@@ -1,6 +1,4 @@
-from scipy.stats import ttest_rel
-from scipy.stats import chi2_contingency
-from scipy.stats import chi2
+ from scipy.stats import t, sem, chi2, chi2_contingency
 import pandas as pd
 import numpy as np
 
@@ -39,48 +37,75 @@ class statistical_package:
         self.user_target_label = user_target_label
         self.cont_cols = list({key:value for (key,value) in column_dtypes.items() if value == "float64"}.keys())
         self.cat_cols = list({key:value for (key,value) in column_dtypes.items() if value == "category"}.keys())
+
+    def mean_confidence_interval(df:"two column dataframe", target, confidence=0.95):
+        """Takes in two columns: target(Category) and test column (continous)."""
+        target_len = len(df.iloc[:,1].unique())
+        ci = []
+        for i in range(target_len): #Accessing all unique categories in target, running all groupings of contious variables though test.
+            data = df[df.iloc[:,1] == df.iloc[:,1].unique()[i]].iloc[:,0]
+            a = 1.0 * np.array(data)
+            n = len(a)
+            m, se = np.mean(a), sem(a)
+            h = se * t.ppf((1 + confidence) / 2., n-1)
+            ci.append([m-h,m+h])
+        return ci
         
     def continuous_tests_with_cat_target(self):
-        self.ttest_results = {}
-        self.target = self.df[f"{user_target_label}"].cat.cols
+        self.ci_results = {}
+        self.target = self.df[f"{user_target_label}"]
         for col in cont_cols:
-            if len(col.dropna()) >= 50:
-                results = ttest_ind(col, target)
+            if len(col.count()) >= 200:
+                x_len = len(x)
+                maxs = []
+                mins = []
+                sec = []
+                for i in range(len(x)):
+                    maxs.append(x[i][1])
+                    mins.append(x[i][0])
+                    sec.append(x[i][1] - x[i][0])
+                drop_col = np.array(max(maxs)) - np.array(min(mins)) < sum(sec)
+                if drop_col == True:
+                    self.df.drop(columns=f"{col}", inplace=True)
 
 
 
-target = df2.Attrition.cat.codes
-
-
-target = df2.Attrition.cat.codes
-df2 = test.df.dropna()
-ttest_ind(target.sample(15), df2.Age.sample(15))
+                
 
 
 
 
-test = statistical_package(phase_one.df, phase_one.column_dtypes, "Attrition")
-test.cont_cols
-test.cat_cols
 
-for cols in test.cont_cols:
-    ttest_ind(test.df[cols], test.df.Attrition.cat.codes)
+for i in range(len(df.EducationField.unique())):
+    print (df.EducationField.unique()[i])
 
-    test.cont_cols
 
-test.df.DailyRate
-test.df.Attrition
-test.cat_cols
-test.df.JobLevel.cat.codes
+x = mean_confidence_interval(df[["DailyRate", "Attrition"]], "Attrition")
 
-p = []
-for i in range(101):
-    p.append(ttest_rel(test.df.DistanceFromHome, test.df.Gender.cat.codes)[1])
+from random import shuffle
 
-pd.Series(p).describe()
+def test(x):
+    loop = []
+    for t in range(1000):
+        shuffle(x)
+        mins = []
+        for i in range(1,len(x)):
+            mins.append(min(np.array(max(x[0], x[i])) - np.array(min(x[0], x[i]))))
+        if max(mins) > 0:
+            loop.append(1)
+        else:
+            loop.append(0)
+    return loop
 
-df2.DailyRate.corr(df2.EducationField.cat.codes)
+l = test(x)
+min(l)
+mins
+# Find if there are any CI's that don't overlap, if so then we keep the column, else we drop
 
-check_chi(df2.Gender, df2.Department)
-check_chi(df2.Attrition, df2.BusinessTravel)
 
+
+
+
+import seaborn as sns
+
+sns.catplot(x="Age", y="Attrition", data=df, kind="violin")
