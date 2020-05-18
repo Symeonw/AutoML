@@ -2,16 +2,14 @@ import pymc3 as pm
 import pandas as pd
 import numpy as np
 
-drug = (101,100,102,104,102,97,105,105,98,101,100,123,105,103,100,95,102,106,
-        109,102,82,102,100,102,102,101,102,102,103,103,97,97,103,101,97,104,
-        96,103,124,101,101,100,101,101,104,100,101)
-placebo = (99,101,100,101,102,100,97,101,104,101,102,102,100,105,88,101,100,
-           104,100,100,100,101,102,103,97,101,101,100,101,99,101,100,100,
-           101,100,99,101,100,102,99,100,99)
+df2 = pd.read_csv("test_data/IBM_Data.csv")
 
-y1 = np.array(drug)
-y2 = np.array(placebo)
-y = pd.DataFrame(dict(value=np.r_[y1, y2], group=np.r_[['drug']*len(drug), ['placebo']*len(placebo)]))
+X = df2[df2.Attrition == "Yes"].DistanceFromHome
+Y = df2[df2.Attrition == "No"].DistanceFromHome
+y1 = np.array(X)
+y2 = np.array(Y)
+y = pd.DataFrame(dict(value=np.r_[y1, y2], group=np.r_[['X']*len(X), ['Y']*len(Y)]))
+y.hist('value', by='group', figsize=(12, 4))
 
 μ_m = y.value.mean()
 μ_s = y.value.std() * 2
@@ -48,4 +46,15 @@ with model:
                                    diff_of_means / np.sqrt((group1_std**2 + group2_std**2) / 2))
 
 with model:
-    trace = pm.sample(2000)
+    trace = pm.sample(5000,  tune=2000, cores=1)
+
+pm.plot_posterior(trace, var_names=['group1_mean','group2_mean', 'group1_std', 'group2_std', 'ν_minus_one'],
+                  color='#87ceeb')
+
+
+pm.plot_posterior(trace, var_names=['difference of means','difference of stds', 'effect size'],ref_val=0,color='#87ceeb')
+
+import seaborn as sns
+
+sns.catplot(x="NumCompaniesWorked",y="Attrition",data=df2, kind="violin")
+df2.columns
