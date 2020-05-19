@@ -1,7 +1,8 @@
- from scipy.stats import t, sem, chi2, chi2_contingency
+from scipy.stats import t, sem, chi2, chi2_contingency
 import pandas as pd
 import numpy as np
 from phase_one_data_prep_cls import phase_one_data_prep as pop
+from itertools import combinations
 
 def create_chi_table():
     p = np.array([0.995, 0.99, 0.975, 0.95, 0.90, 0.10, 0.05, 0.025, 0.01, 0.005])
@@ -26,7 +27,7 @@ def check_chi(var1,var2):
 #Documentation
     #cont_cols
     #cat_cols
-    #dropped_cols - [(0, Dropped at CI), (1, )
+    #dropped_cols_stats - [(0, Dropped at CI), (1, )
 
 class stats_package:
 
@@ -36,7 +37,7 @@ class stats_package:
         self.target = user_target_label
         self.cont_cols = list({key:value for (key,value) in column_dtypes.items() if value == "float64"}.keys())
         self.cat_cols = list({key:value for (key,value) in column_dtypes.items() if value == "category"}.keys())
-        self.dropped_cols = {}
+        self.dropped_cols_stats = {}
 
     def mean_confidence_interval(df:"two column dataframe", confidence=0.95):
         """Takes in two columns: target(Category) and test column (continous)."""
@@ -52,7 +53,7 @@ class stats_package:
         return ci
         
     def continuous_tests_with_cat_target(self):
-        self.ci_results = {}
+        removed_cols = []
         for col in self.cont_cols:
             if self.df[col].count() >= 100:
                 ci = stats_package.mean_confidence_interval(self.df[[col, self.target]])
@@ -66,36 +67,42 @@ class stats_package:
                 drop_col = np.array(max(maxs)) - np.array(min(mins)) < sum(totals)
                 if drop_col == True:
                     self.df.drop(columns=[col], inplace=True)
-                    self.dropped_cols.update({col:0})
+                    self.dropped_cols_stats.update({col:0})
+                    removed_cols.append(col)
+                if mins == maxs:
+                    self.df.drop(columns=[col], inplace=True)
+                    self.dropped_cols_stats.update({col:0})
+                    removed_cols.append(col)
+        [self.cont_cols.remove(item) for item in removed_cols]
+
     
+    def clear_related_columns(self):
+        corr_list = []
+        col_list = list(combinations(self.cont_cols,2))
+        for col1,col2 in col_list:
+            corr_list.append(self.df[col1].corr(col2))
+        for item in zip(corr_list, col_list):
+
+
+
 
 df = pd.read_csv("test_data/IBM_Data.csv")
 column_dtypes = [0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0]
-col_list = df.columns
-
 test = pop(df,"F647952", column_dtypes, "Attrition")
 test.execute_phase_one()
 test = stats_package(test.df, test.column_dtypes, test.user_target_label)
 test.continuous_tests_with_cat_target()
-test.dropped_cols
+test.dropped_cols_stats
+test.cont_cols
 
+corr_list = []
+col_list = list(combinations(test.cont_cols,2))
+for col1,col2 in col_list:
+    corr_list.append(test.df[col1].corr(test.df[col2]))
 
+for item in zip(corr_list, col_list):
+    print(item[1][0])
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#For tomorrow:
+#Find out how to drop values > 90% correlation
+#Thoughts: What if all columns that corr are dropped due to its correlation with the others? is that possiable? 
