@@ -4,11 +4,6 @@ from scipy.stats import median_absolute_deviation as MAD
 
 df = pd.read_csv("test_data/IBM_Data.csv")
 user_column_input = [0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0]
-for col in df.columns:
-    if col == "Age":
-        df.loc[df.sample(frac=0.5).index, col] = pd.np.nan #Makes fake Nan's
-    if col == "Education":
-        df.loc[df.sample(frac=0.7).index, col] = pd.np.nan #Makes fake Nan's
 
 df.at[0, "Age"] = 200
 
@@ -90,7 +85,7 @@ class phase_one_data_prep:
 
 
 
-test = phase_one_data_prep(df, "AFH6G7W", user_column_input)
+test = phase_one_data_prep(df, "AFH6G7W", user_column_input, "Age")
 
 test.assign_column_types()
 test.handel_nans()
