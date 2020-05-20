@@ -23,7 +23,7 @@ class categorical_target(stats_package):
         self.cat_cols = list({key:value for (key,value) in column_dtypes.items() if value == "category" if key != user_target_label}.keys())
         self.dropped_cols_stats = {}
 
-    def mean_confidence_interval(df:"two column dataframe", confidence=0.95):
+    def mean_confidence_interval(df:"two column dataframe", confidence=0.90):
         """Takes in two columns: target(Category) and test column (continous)."""
         target_len = len(df.iloc[:,1].unique())
         ci = []
@@ -131,14 +131,14 @@ class continuous_target(stats_package):
                 removed_cols.append(col)
                 self.dropped_cols_stats.update({col:3})
                 continue
-            if len(self.df[col].unique()) <= 1:
+            if self.df[col].nunique() <= 1:
                 removed_cols.append(col)
                 self.dropped_cols_stats.update({col:4})
         self.df.drop(columns=removed_cols, inplace=True)
         [self.cont_cols.remove(item) for item in removed_cols]
 
 
-    def mean_confidence_interval(df:"two column dataframe", confidence=0.95):
+    def mean_confidence_interval(df:"two column dataframe", confidence=0.90):
         """Takes in two columns: target(Category) and test column (continous)."""
         target_len = len(df.iloc[:,1].unique())
         ci = []
@@ -154,9 +154,9 @@ class continuous_target(stats_package):
     def ci_test(self):
         """Preforms confidence interval test on columns with greater than 100 values"""
         removed_cols = []
-        for col in self.cont_cols:
+        for col in self.cat_cols:
             if self.df[col].count() >= 100:
-                ci = categorical_target.mean_confidence_interval(self.df[[col, self.target]])
+                ci = continuous_target.mean_confidence_interval(self.df[[self.target, col]])
                 maxs = []
                 mins = []
                 totals = []
@@ -172,39 +172,33 @@ class continuous_target(stats_package):
                     self.dropped_cols_stats.update({col:0})
                     removed_cols.append(col)
         self.df.drop(columns=removed_cols, inplace=True)
-        [self.cont_cols.remove(item) for item in removed_cols]
+        [self.cat_cols.remove(item) for item in removed_cols]
 
 
 
 
     
 
-
-#Continuous Testing
-df = pd.read_csv("test_data/IBM_Data.csv")
-column_dtypes = [0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0]
-test = pop(df,"F647952", column_dtypes, "Attrition")
-test.execute_phase_one()
-test = categorical_target(test.df, test.column_dtypes, test.user_target_label)
-test.ci_test()
-test.clear_over_correlated_columns()
-test.chi_test()
-test.dropped_cols_stats
-
-
-#Categorical Testing
-df = pd.read_csv("test_data/IBM_Data.csv")
-column_dtypes = [0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0]
-test = pop(df,"F647952", column_dtypes, "Age")
-test.execute_phase_one()
-test = continuous_target(test.df, test.column_dtypes, test.user_target_label)
-test.clear_over_correlated_columns()
-test.lin_corr_test()
-test.dropped_cols_stats
+# #Categorical Testing
+# df = pd.read_csv("test_data/internet_usage.csv")
+# column_dtypes = [0,0,1,0,1,0,1,1]
+# test = pop(df,"F647952", column_dtypes, "target")
+# test.execute_phase_one()
+# test = categorical_target(test.df, test.column_dtypes, test.user_target_label)
+# test.ci_test()
+# test.clear_over_correlated_columns()
+# test.chi_test()
+# test.dropped_cols_stats
 
 
-
-#For tomorrow:
-#Find out how to drop values > 90% correlation
-#Thoughts: What if all columns that corr are dropped due to its correlation with the others? is that possiable? 
+# #Continuous Testing
+# df = pd.read_csv("test_data/IBM_Data.csv")
+# column_dtypes = [0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0]
+# test = pop(df,"F647952", column_dtypes, "Age")
+# test.execute_phase_one()
+# test = continuous_target(test.df, test.column_dtypes, test.user_target_label)
+# test.clear_over_correlated_columns()
+# test.lin_corr_test()
+# test.ci_test()
+# test.dropped_cols_stats
 
