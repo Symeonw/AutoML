@@ -12,16 +12,15 @@ from itertools import combinations
 class stats_package:
 
     def __init__(self, data_file, column_dtypes, user_target_label):
-        #del phase_one.df
         self.df = data_file
-        self.target = user_target_label
-        self.cont_cols = list({key:value for (key,value) in column_dtypes.items() if value == "float64" if key != user_target_label}.keys())
-        self.cat_cols = list({key:value for (key,value) in column_dtypes.items() if value == "category" if key != user_target_label}.keys())
-        self.dropped_cols_stats = {}
 
 class categorical_target(stats_package):
     def __init__(self, data_file, column_dtypes, user_target_label):
         super().__init__(data_file, column_dtypes, user_target_label)
+        self.target = user_target_label
+        self.cont_cols = list({key:value for (key,value) in column_dtypes.items() if value == "float64" if key != user_target_label}.keys())
+        self.cat_cols = list({key:value for (key,value) in column_dtypes.items() if value == "category" if key != user_target_label}.keys())
+        self.dropped_cols_stats = {}
 
     def mean_confidence_interval(df:"two column dataframe", confidence=0.95):
         """Takes in two columns: target(Category) and test column (continous)."""
@@ -35,7 +34,7 @@ class categorical_target(stats_package):
             h = se * t.ppf((1 + confidence) / 2., n-1)
             ci.append([m-h,m+h])
         return ci
-        
+
     def continuous_tests_with_cat_target(self):
         """Preforms confidence interval test on columns with greater than 100 values"""
         removed_cols = []
@@ -52,17 +51,17 @@ class categorical_target(stats_package):
                 drop_col = np.array(max(maxs)) - np.array(min(mins)) < sum(totals)
                 if drop_col == True:
                     self.df.drop(columns=[col], inplace=True)
-                    self.dropped_cols_stats.update({0:col})
+                    self.dropped_cols_stats.update({col:0})
                     removed_cols.append(col)
                 if mins == maxs:
                     self.df.drop(columns=[col], inplace=True)
-                    self.dropped_cols_stats.update({0:col})
+                    self.dropped_cols_stats.update({col:0})
                     removed_cols.append(col)
         [self.cont_cols.remove(item) for item in removed_cols]
 
     
     def clear_over_correlated_columns(self):
-        """Checks if two of the contious columns have over .90 correlation, if so one of them is removed."""
+        """Checks if two of the continuous columns have over .90 correlation, if so one of them is removed."""
         corr_list = []
         col_list = list(combinations(self.cont_cols,2))
         for col1,col2 in col_list:
@@ -99,6 +98,10 @@ class categorical_target(stats_package):
 class continuous_target(stats_package):
     def __init__(self, data_file, column_dtypes, user_target_label):
         super().__init__(data_file, column_dtypes, user_target_label)
+        self.target = user_target_label
+        self.cont_cols = list({key:value for (key,value) in column_dtypes.items() if value == "float64" if key != user_target_label}.keys())
+        self.cat_cols = list({key:value for (key,value) in column_dtypes.items() if value == "category" if key != user_target_label}.keys())
+        self.dropped_cols_stats = {}
 
     
 
@@ -111,8 +114,11 @@ test = pop(df,"F647952", column_dtypes, "Attrition")
 test.execute_phase_one()
 test = categorical_target(test.df, test.column_dtypes, test.user_target_label)
 test.continuous_tests_with_cat_target()
-
 test.dropped_cols_stats
+
+
+
+test.clear_over_correlated_columns()
 
 test.cont_cols
 test.cat_cols
