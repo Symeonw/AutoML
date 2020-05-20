@@ -7,7 +7,8 @@ from itertools import combinations
 #Documentation
     #cont_cols
     #cat_cols
-    #dropped_cols_stats - [(0, Dropped at CI), (1, Dropped due to correlation with another column), 
+    #dropped_cols_stats - [(0, Dropped at CI Test), (1, Dropped at Correlation Test), 
+        #(2, Dropped due at Chi-Squared Test), 
 
 class stats_package:
 
@@ -70,9 +71,9 @@ class categorical_target(stats_package):
         for corr, cols in zip(corr_list, col_list):
             if cols[0] in drop_list:
                 continue
-            if corr > .8:
+            if corr > .9 :
                 drop_list.append(cols[0])
-                self.dropped_cols.update({cols[0]:1})
+                self.dropped_cols_stats.update({cols[0]:1})
         self.df.drop(columns = drop_list, inplace=True)
 
     def create_chi_table():
@@ -85,11 +86,13 @@ class categorical_target(stats_package):
 
 
     def check_chi(self):
+        removed_cols = []
         for col in self.cat_cols:
             chi_inp = pd.crosstab(self.df[col], self.df[target])
             chi2, p, dof, expected = chi2_contingency(chi_inp.values)
             if np.array(i >= 5 for i in expected).all() == False:
-                continue
+                removed_cols.append(col)
+                self.dropped_cols_stats.update({col:2})
             if create_chi_table()[dof-1][6] > chi2 or p > .05 :
                 print("These variables are independent, failed to reject H0.")
             else:
@@ -103,7 +106,6 @@ class continuous_target(stats_package):
         self.cat_cols = list({key:value for (key,value) in column_dtypes.items() if value == "category" if key != user_target_label}.keys())
         self.dropped_cols_stats = {}
 
-    
 
 
 
@@ -115,10 +117,8 @@ test.execute_phase_one()
 test = categorical_target(test.df, test.column_dtypes, test.user_target_label)
 test.continuous_tests_with_cat_target()
 test.dropped_cols_stats
-
-
-
 test.clear_over_correlated_columns()
+
 
 test.cont_cols
 test.cat_cols
