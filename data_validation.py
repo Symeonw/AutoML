@@ -20,26 +20,29 @@ def data_validation(file_path, sheet_name=None):
 
     labels = [] 
     for col in df.columns:
+        dfi = pd.DataFrame(df[col].unique(), columns=[col])
+        if len(dfi[col]) == len(df[col]):
+            labels.append(1)
+            continue
         try:
-            if df[col].str.isnumeric().all() == False:
+            if all(dfi[col].astype(str).str.isnumeric()) == False:
                 labels.append(1)
                 continue
             #Captures all data with letters
         except:
             pass
-
         try:
-            if all(x.isdigit() for x in df[col]) == False:
+            if all(x.isdigit() for x in dfi[col]) == False:
                 labels.append(1)
             #Captures all strings with only numbers
         except:
-            if df[col].dtype == float:
+            if dfi[col].dtype == float:
                 labels.append(0)
                 continue
             #Captures all  floats
-            values = df[col].unique()
+            values = df[col]
             unique_range = [i for i in range(min(values), max(values)+1)]
-            if (sorted(df[col].unique()) == unique_range):
+            if (sorted(dfi[col]) == unique_range):
                 if (min(unique_range) == 1) | (min(unique_range) == 0):
                     labels.append(1)
             #Captures all columns who's min value begins with 1 or 0 and all values are present from min() to max() in their unique values.

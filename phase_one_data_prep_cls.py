@@ -10,10 +10,10 @@ df.at[0, "Age"] = 200
 
 #Need documentation for the following:
 # self.df
-# 
 # self.column_dtypes
 # self.dropped_cols_phase_one
 # self.outliers_dropped: Amount of rows dropped due to outliers occuring in a given column. 
+
 class phase_one_data_prep:
 
     def __init__(self, data_file, user_id, user_column_label, user_target_label):
