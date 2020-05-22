@@ -2,10 +2,10 @@ import pandas as pd
 import numpy as np
 from scipy.stats import median_absolute_deviation as MAD
 
-df = pd.read_csv("test_data/IBM_Data.csv")
-user_column_input = [0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0]
+# df = pd.read_csv("test_data/IBM_Data.csv")
+# user_column_input = [0,1,1,0,1,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,0,0,0]
 
-df.at[0, "Age"] = 200
+# df.at[0, "Age"] = 200
 
 
 #Need documentation for the following:
@@ -59,6 +59,7 @@ class phase_one_data_prep:
         values_dropped = []
         cont_cols = self.df.select_dtypes(exclude=["category"]).columns # Gets continous columns  
         for col in cont_cols:
+            print(col)
             df_len = len(self.df)
             top_value = self.df[col].value_counts(normalize=True, ascending=False, dropna=True)\
                 .head(1).reset_index().to_numpy()[0] #Gets the top occuring value along with its percentage of occurances
@@ -85,11 +86,11 @@ class phase_one_data_prep:
 
 
 
-test = phase_one_data_prep(df, "AFH6G7W", user_column_input, "Age")
+# test = phase_one_data_prep(df, "AFH6G7W", user_column_input, "Age")
 
-test.assign_column_types()
-test.handel_nans()
-test.dropped_cols_phase_one
-test.identify_and_handel_outliers()
-test.outliers_dropped
+# test.assign_column_types()
+# test.handel_nans()
+# test.dropped_cols_phase_one
+# test.identify_and_handel_outliers()
+# test.outliers_dropped
 
