@@ -62,25 +62,22 @@ class phase_one_data_prep:
         for col in cont_cols:
 #TODO: Add lines to check column len(), if len() == 0, drop drop column, create cont_cols and cat_cols, and drop from there as well. 
             df_len = len(self.df)
-            try:
-                top_value = self.df[col].value_counts(normalize=True, ascending=False, dropna=True)
-                top_value = top_value.head(1).reset_index().to_numpy()[0] #Gets the top occuring value along with its percentage of occurances
-                if top_value[1] > 0.5:#Test if the top occuring value makes up more than 50% of the data
-                    remaining_col = self.df[col][~self.df[col].isin([top_value[0]])] #Gets all values not within the 50% of single value data
-                    self.df[f"{col}_mod_z"] = phase_one_data_prep.modified_zscore(remaining_col) #Gets modified z-score for remaining items
-                    self.df[f"{col}_mod_z"] = self.df[f"{col}_mod_z"].fillna(0) #Fills all missing z-scores\
-                        #with zero(because that 50% of data removed would be zero anyways)
-                    self.df = self.df[self.df[f"{col}_mod_z"] < 3] #Removed all values outside 3
-                    col_list.append(f"{col}_mod_z")#Appends name of column to list
-                    values_dropped.append((col, df_len - len(self.df)))
-                else:
-                    self.df[f"{col}_mod_z"] = phase_one_data_prep.modified_zscore(self.df[col]) #Gets modified z-score 
-                    self.df[f"{col}_mod_z"] = self.df[f"{col}_mod_z"].fillna(0)
-                    self.df = self.df[self.df[f"{col}_mod_z"] < 3] #Removed all values outside 3
-                    col_list.append(f"{col}_mod_z")#Appends name of column to list
-                    values_dropped.append((col, df_len - len(self.df)))
-            except:
-                print(f"Error with {col}")
+            top_value = self.df[col].value_counts(normalize=True, ascending=False, dropna=True)
+            top_value = top_value.head(1).reset_index().to_numpy()[0] #Gets the top occuring value along with its percentage of occurances
+            if top_value[1] > 0.5:#Test if the top occuring value makes up more than 50% of the data
+                remaining_col = self.df[col][~self.df[col].isin([top_value[0]])] #Gets all values not within the 50% of single value data
+                self.df[f"{col}_mod_z"] = phase_one_data_prep.modified_zscore(remaining_col) #Gets modified z-score for remaining items
+                self.df[f"{col}_mod_z"] = self.df[f"{col}_mod_z"].fillna(0) #Fills all missing z-scores\
+                    #with zero(because that 50% of data removed would be zero anyways)
+                self.df = self.df[self.df[f"{col}_mod_z"] < 3] #Removed all values outside 3
+                col_list.append(f"{col}_mod_z")#Appends name of column to list
+                values_dropped.append((col, df_len - len(self.df)))
+            else:
+                self.df[f"{col}_mod_z"] = phase_one_data_prep.modified_zscore(self.df[col]) #Gets modified z-score 
+                self.df[f"{col}_mod_z"] = self.df[f"{col}_mod_z"].fillna(0)
+                self.df = self.df[self.df[f"{col}_mod_z"] < 3] #Removed all values outside 3
+                col_list.append(f"{col}_mod_z")#Appends name of column to list
+                values_dropped.append((col, df_len - len(self.df)))
         self.df.drop(columns = col_list, inplace=True)#Removed columns created to test modified z-score
         self.outliers_dropped = values_dropped
 
