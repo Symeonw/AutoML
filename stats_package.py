@@ -41,7 +41,7 @@ class categorical_target(stats_package):
         removed_cols = []
         for col in self.cont_cols:
             if self.df[col].count() >= 100:
-                ci = categorical_target.mean_confidence_interval(self.df[[col, self.target]])
+                ci = categorical_target.mean_confidence_interval(self.df[[col, self.target]])#Run CI test
                 maxs = []
                 mins = []
                 totals = []
@@ -110,7 +110,7 @@ class continuous_target(stats_package):
         """Checks if two of the continuous columns have over .90 correlation, if so one of them is removed."""
         removed_cols = []
         corr_list = []
-        col_list = list(combinations(self.cont_cols,2))
+        col_list = list(combinations(self.cont_cols,2))#Gets all combinations of all continuous columns in group sizes of two
         for col1,col2 in col_list:
             corr_list.append(self.df[col1].corr(self.df[col2]))
         for corr, cols in zip(corr_list, col_list):
