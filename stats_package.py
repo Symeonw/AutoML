@@ -40,6 +40,7 @@ class categorical_target(stats_package):
         """Preforms confidence interval test on columns with greater than 100 values"""
         removed_cols = []
         for col in self.cont_cols:
+            print(f"CI TEST FOR {col}")
             if self.df[col].count() >= 100:
                 ci = categorical_target.mean_confidence_interval(self.df[[col, self.target]])#Run CI test
                 maxs = []
@@ -66,6 +67,7 @@ class categorical_target(stats_package):
         corr_list = []
         col_list = list(combinations(self.cont_cols,2))
         for col1,col2 in col_list:
+            print(f"OVER CORR TEST FOR {col1} {col2}")
             corr_list.append(self.df[col1].corr(self.df[col2]))
         for corr, cols in zip(corr_list, col_list):
             if cols[0] in removed_cols:
@@ -88,6 +90,7 @@ class categorical_target(stats_package):
     def chi_test(self):
         removed_cols = []
         for col in self.cat_cols:
+            print(f"CHI TEST FOR {col}")
             chi_inp = pd.crosstab(self.df[col], self.df[self.target])
             chi2, p, dof, expected = chi2_contingency(chi_inp.values)
             if np.array(i >= 5 for i in expected).all() == False:
@@ -112,6 +115,7 @@ class continuous_target(stats_package):
         corr_list = []
         col_list = list(combinations(self.cont_cols,2))#Gets all combinations of all continuous columns in group sizes of two
         for col1,col2 in col_list:
+            print(f"OVER CORR TEST FOR {col1} {col2}")
             corr_list.append(self.df[col1].corr(self.df[col2]))
         for corr, cols in zip(corr_list, col_list):
             if cols[0] in removed_cols:
@@ -127,6 +131,7 @@ class continuous_target(stats_package):
         """Checks if contious columns have at least +/- .20  correlation with the target column."""
         removed_cols = []
         for col in self.cont_cols:
+            print(f"LINCORR TEST FOR {col}")
             if (self.df[col].corr(self.df[self.target]) < .2) | (self.df[col].corr(self.df[self.target]) < -.2):
                 removed_cols.append(col)
                 self.dropped_cols_stats.update({col:3})
@@ -155,6 +160,7 @@ class continuous_target(stats_package):
         """Preforms confidence interval test on columns with greater than 100 values"""
         removed_cols = []
         for col in self.cat_cols:
+            print(f"CI TEST FOR {col}")
             if self.df[col].count() >= 100:
                 ci = continuous_target.mean_confidence_interval(self.df[[self.target, col]])
                 maxs = []
