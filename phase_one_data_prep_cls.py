@@ -20,7 +20,7 @@ class phase_one_data_prep:
         self.df= data_file
         self.user_id = user_id
         self.user_column_label = user_column_label
-        self.user_target_label = user_target_label
+        self.target = user_target_label
 #TODO: create cont_cols and cat_cols list as in stats_package. 
 
     def assign_column_types(self):
@@ -42,6 +42,7 @@ class phase_one_data_prep:
         [self.df.drop(columns=[col[1]], inplace=True) for col in dropped_col]
         self.dropped_cols_phase_one = dropped_col
         [self.column_dtypes.pop(item[1]) for item in dropped_col]
+        self.df[self.target].dropna(inplace=True)
     
 
     def modified_zscore(col):

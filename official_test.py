@@ -25,7 +25,7 @@ print(end - start)
 
 
 start = time.time()
-test = stats_package.continuous_target(phase_one.df, phase_one.column_dtypes, phase_one.user_target_label)
+test = stats_package.continuous_target(phase_one.df, phase_one.column_dtypes, phase_one.target)
 test.clear_over_correlated_columns()
 test.lin_corr_test()
 test.ci_test()
@@ -46,9 +46,7 @@ df.rawcensustractandblock.isnull().sum()
 
 
 #TODO: Is there anything we could do to make the CI test faster ASAP?
-
-
-
+df = pd.read_csv("test_data/zillow_data.csv")
 
 def mean_confidence_interval(df:"two column dataframe", confidence=0.90):
     """Takes in two columns: target(Category) and test column (continous)."""
@@ -56,6 +54,8 @@ def mean_confidence_interval(df:"two column dataframe", confidence=0.90):
     ci = []
     for i in range(target_len): #Accessing all unique categories in target, running all groupings of contious variables though test.
         data = df[df.iloc[:,1] == df.iloc[:,1].unique()[i]].iloc[:,0]
+        if data < 30:
+            continue
         a = 1.0 * np.array(data)
         n = len(a)
         m, se = np.mean(a), sem(a)
@@ -63,28 +63,35 @@ def mean_confidence_interval(df:"two column dataframe", confidence=0.90):
         ci.append([m-h,m+h])
     return ci
 
+start = time.time()
+x = mean_confidence_interval(df[["decktypeid", "taxamount"]])
+end = time.time()
+print(end - start, " Stats")
+
+df.decktypeid.nunique()
+
+df2=df[["rawcensustractandblock", "taxamount"]]
+
+df2.iloc[:,0].unique()
+df.decktypeid.unique()
+
+df = phase_one.df[["rawcensustractandblock", "taxamount"]]
+
+data = df[df.iloc[:,1]==df.iloc[:,1].unique()[1]]
+data.count() > 30
+
+df.taxamount.isnull().sum()/len(df.taxamount)
+
+df.taxamount.dropna(inplace=True)
+(df.propertyzoningdesc.value_counts() > 30).sum()
+
+from scipy.stats import t
+
+1.0 * np.array(data)
 
 
-def ci_test(self):
-    """Preforms confidence interval test on columns with greater than 100 values"""
-    removed_cols = []
-    for col in self.cat_cols:
-        print(f"CI TEST FOR {col}")
-        if self.df[col].count() >= 100:
-            ci = continuous_target.mean_confidence_interval(self.df[[self.target, col]])
-            maxs = []
-            mins = []
-            totals = []
-            for i in range(len(ci)):
-                maxs.append(ci[i][1])
-                mins.append(ci[i][0])
-                totals.append(ci[i][1] - ci[i][0])
-            drop_col = np.array(max(maxs)) - np.array(min(mins)) < sum(totals)
-            if drop_col == True:
-                self.dropped_cols_stats.update({col:0})
-                removed_cols.append(col)
-            if mins == maxs:
-                self.dropped_cols_stats.update({col:0})
-                removed_cols.append(col)
-    self.df.drop(columns=removed_cols, inplace=True)
-    [self.cat_cols.remove(item) for item in removed_cols]
+phase_one.df.censustractandblock.unique()
+
+df = pd.read_csv("test_data/IBM_Data.csv")
+
+df.EducationField.value_counts(normalized=True)

@@ -29,7 +29,9 @@ class categorical_target(stats_package):
         ci = []
         for i in range(target_len): #Accessing all unique categories in target, running all groupings of contious variables though test.
             data = df[df.iloc[:,1] == df.iloc[:,1].unique()[i]].iloc[:,0]
-            a = 1.0 * np.array(data)
+            if data.count() < 30 == True:
+                continue
+            a = np.array(data)
             n = len(a)
             m, se = np.mean(a), sem(a)
             h = se * t.ppf((1 + confidence) / 2., n-1)
@@ -41,25 +43,27 @@ class categorical_target(stats_package):
         removed_cols = []
         for col in self.cont_cols:
             print(f"CI TEST FOR {col}")
-            if self.df[col].count() >= 100:
-                ci = categorical_target.mean_confidence_interval(self.df[[col, self.target]])#Run CI test
-                maxs = []
-                mins = []
-                totals = []
-                for i in range(len(ci)):
-                    maxs.append(ci[i][1])
-                    mins.append(ci[i][0])
-                    totals.append(ci[i][1] - ci[i][0])
-                drop_col = np.array(max(maxs)) - np.array(min(mins)) < sum(totals)
-                if drop_col == True:
-                    self.dropped_cols_stats.update({col:0})
-                    removed_cols.append(col)
-                if mins == maxs:
-                    self.dropped_cols_stats.update({col:0})
+            if self.df[col].count() >= 120:# 130 was chosen because you need at least 30 values per cat and at least 100 values per column. 
+                ci = continuous_target.mean_confidence_interval(self.df[[self.target, col]])
+                if ci != []:
+                    maxs = []
+                    mins = []
+                    totals = []
+                    for i in range(len(ci)):
+                        maxs.append(ci[i][1])
+                        mins.append(ci[i][0])
+                        totals.append(ci[i][1] - ci[i][0])
+                    drop_col = np.array(max(maxs)) - np.array(min(mins)) < sum(totals)
+                    if drop_col == True:
+                        self.dropped_cols_stats.update({col:0})
+                        removed_cols.append(col)
+                    if mins == maxs:
+                        self.dropped_cols_stats.update({col:0})
+                        removed_cols.append(col)
+                else:
                     removed_cols.append(col)
         self.df.drop(columns=removed_cols, inplace=True)
-        [self.cont_cols.remove(item) for item in removed_cols]
-
+        [self.cat_cols.remove(item) for item in removed_cols]
     
     def clear_over_correlated_columns(self):
         """Checks if two of the continuous columns have over .90 correlation, if so one of them is removed."""
@@ -149,7 +153,9 @@ class continuous_target(stats_package):
         ci = []
         for i in range(target_len): #Accessing all unique categories in target, running all groupings of contious variables though test.
             data = df[df.iloc[:,1] == df.iloc[:,1].unique()[i]].iloc[:,0]
-            a = 1.0 * np.array(data)
+            if data.count() < 30 == True:
+                continue
+            a = np.array(data)
             n = len(a)
             m, se = np.mean(a), sem(a)
             h = se * t.ppf((1 + confidence) / 2., n-1)
@@ -161,22 +167,26 @@ class continuous_target(stats_package):
         removed_cols = []
         for col in self.cat_cols:
             print(f"CI TEST FOR {col}")
-            if self.df[col].count() >= 100:
+            if self.df[col].count() >= 120:# 130 was chosen because you need at least 30 values per cat and at least 100 values per column. 
                 ci = continuous_target.mean_confidence_interval(self.df[[self.target, col]])
-                maxs = []
-                mins = []
-                totals = []
-                for i in range(len(ci)):
-                    maxs.append(ci[i][1])
-                    mins.append(ci[i][0])
-                    totals.append(ci[i][1] - ci[i][0])
-                drop_col = np.array(max(maxs)) - np.array(min(mins)) < sum(totals)
-                if drop_col == True:
-                    self.dropped_cols_stats.update({col:0})
+                if ci != []:
+                    maxs = []
+                    mins = []
+                    totals = []
+                    for i in range(len(ci)):
+                        maxs.append(ci[i][1])
+                        mins.append(ci[i][0])
+                        totals.append(ci[i][1] - ci[i][0])
+                    drop_col = np.array(max(maxs)) - np.array(min(mins)) < sum(totals)
+                    if drop_col == True:
+                        self.dropped_cols_stats.update({col:0})
+                        removed_cols.append(col)
+                    if mins == maxs:
+                        self.dropped_cols_stats.update({col:0})
+                        removed_cols.append(col)
+                else:
                     removed_cols.append(col)
-                if mins == maxs:
-                    self.dropped_cols_stats.update({col:0})
-                    removed_cols.append(col)
+
         self.df.drop(columns=removed_cols, inplace=True)
         [self.cat_cols.remove(item) for item in removed_cols]
 
