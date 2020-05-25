@@ -29,9 +29,9 @@ class categorical_target(stats_package):
         ci = []
         for i in range(target_len): #Accessing all unique categories in target, running all groupings of contious variables though test.
             data = df[df.iloc[:,1] == df.iloc[:,1].unique()[i]].iloc[:,0]
-            if data.count() < 30 == True:
+            if (data.count() < 30) == True:
                 continue
-            a = np.array(data)
+            a = 1.0 * np.array(data)
             n = len(a)
             m, se = np.mean(a), sem(a)
             h = se * t.ppf((1 + confidence) / 2., n-1)
@@ -153,9 +153,9 @@ class continuous_target(stats_package):
         ci = []
         for i in range(target_len): #Accessing all unique categories in target, running all groupings of contious variables though test.
             data = df[df.iloc[:,1] == df.iloc[:,1].unique()[i]].iloc[:,0]
-            if data.count() < 30 == True:
+            if (data.count() < 30) == True:
                 continue
-            a = np.array(data)
+            a = 1.0 * np.array(data)
             n = len(a)
             m, se = np.mean(a), sem(a)
             h = se * t.ppf((1 + confidence) / 2., n-1)

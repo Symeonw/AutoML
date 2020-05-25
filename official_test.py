@@ -87,8 +87,7 @@ df.taxamount.dropna(inplace=True)
 
 from scipy.stats import t
 
-1.0 * np.array(data)
-
+t.interval(.9, np.array(data))
 
 phase_one.df.censustractandblock.unique()
 
