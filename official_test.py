@@ -75,22 +75,36 @@ df2=df[["rawcensustractandblock", "taxamount"]]
 df2.iloc[:,0].unique()
 df.decktypeid.unique()
 
-df = phase_one.df[["rawcensustractandblock", "taxamount"]]
-
-data = df[df.iloc[:,1]==df.iloc[:,1].unique()[1]]
-data.count() > 30
-
-df.taxamount.isnull().sum()/len(df.taxamount)
-
-df.taxamount.dropna(inplace=True)
-(df.propertyzoningdesc.value_counts() > 30).sum()
+df = phase_one.df
 
 from scipy.stats import t
-
-t.interval(.9, np.array(data))
+a = np.array(data)
+t.interval(.9, len(a)-1, loc=np.mean(a))
 
 phase_one.df.censustractandblock.unique()
 
 df = pd.read_csv("test_data/IBM_Data.csv")
 
 df.EducationField.value_counts(normalized=True)
+
+x = pd.DataFrame(df.propertyzoningdesc.value_counts(normalize=True)>0.001).reset_index()
+x[x.iloc[:,1] == True].iloc[:,0]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

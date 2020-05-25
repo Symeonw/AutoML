@@ -44,7 +44,7 @@ class phase_one_data_prep:
         [self.column_dtypes.pop(item[1]) for item in dropped_col]
         self.df[self.target].dropna(inplace=True)
     
-
+    
     def modified_zscore(col):
         """Makes calulations for Modified Z-Score"""
         col = col.dropna()
