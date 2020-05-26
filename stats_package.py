@@ -1,14 +1,14 @@
 from scipy.stats import t, sem, chi2, chi2_contingency
 import pandas as pd
 import numpy as np
-from phase_one_data_prep_cls import phase_one_data_prep as pop
+from phase_one_data_prep import phase_one_data_prep as pop
 from itertools import combinations
 
 #Documentation
     #cont_cols
     #cat_cols
     #dropped_cols_stats - [(0, Dropped at CI Test), (1, Dropped at Correlation Test), 
-        #(2, Dropped due at Chi-Squared Test), (3, Dropped at Linear Correlation test), (4, Dropped due to single value in whole column)
+        #(2, Dropped due at Chi-Squared Test), (3, Dropped at Linear Correlation test),
 
 class stats_package:
 
@@ -29,8 +29,6 @@ class categorical_target(stats_package):
         ci = []
         for i in range(target_len): #Accessing all unique categories in target, running all groupings of contious variables though test.
             data = df[df.iloc[:,1] == df.iloc[:,1].unique()[i]].iloc[:,0]#Gets i'th unique value from target unique values. 
-            if (data.count() < 30) == True:
-                continue
             a = 1.0 * np.array(data)
             n = len(a)
             m, se = np.mean(a), sem(a)
@@ -41,7 +39,6 @@ class categorical_target(stats_package):
     def ci_test(self):
         """Preforms confidence interval test on columns with greater than 100 values"""
         removed_cols = []
-        
         for col in self.cont_cols:
             print(f"CI TEST FOR {col}")
             ci = continuous_target.mean_confidence_interval(self.df[[self.target, col]])
@@ -136,22 +133,43 @@ class continuous_target(stats_package):
         removed_cols = []
         for col in self.cont_cols:
             print(f"LINCORR TEST FOR {col}")
-            if (self.df[col].corr(self.df[self.target]) < .2) | (self.df[col].corr(self.df[self.target]) < -.2):
-                removed_cols.append(col)
-                self.dropped_cols_stats.update({col:3})
-                continue
-            if self.df[col].nunique() <= 1:
-                removed_cols.append(col)
-                self.dropped_cols_stats.update({col:4})
+            if (self.df[col].corr(self.df[self.target]) < .2) | (self.df[col].corr(self.df[self.target]) < -.2):#testing linear corr, drops if greater than .2 or lower than -.2
+                if self.df[col].count() >= 120:#this section preforms a CI test on those dropped columns
+                    ci = continuous_target.mean_confidence_interval(self.df[[col, self.target]], .99, 0.005)
+                    if len(ci) > 1:
+                        maxs = []
+                        mins = []
+                        totals = []
+                        for i in range(len(ci)):
+                            maxs.append(ci[i][1])
+                            mins.append(ci[i][0])
+                            totals.append(ci[i][1] - ci[i][0])
+                        drop_col = np.array(max(maxs)) - np.array(min(mins)) < sum(totals)
+                        if drop_col == True:
+                            self.dropped_cols_stats.update({col:3})
+                            removed_cols.append(col)
+                        if mins == maxs:
+                            self.dropped_cols_stats.update({col:3})
+                            removed_cols.append(col)
+                    else:
+                        removed_cols.append(col)
+                        self.dropped_cols_stats.update({col:3})
+                        
+                else:
+                    removed_cols.append(col)
+                    self.dropped_cols_stats.update({col:3})
         self.df.drop(columns=removed_cols, inplace=True)
         [self.cont_cols.remove(item) for item in removed_cols]
 
 
-    def mean_confidence_interval(df:"two column dataframe", confidence=0.90):
+    def mean_confidence_interval(df:"two column dataframe", confidence=0.90, occurance=0.001):
         """Takes in two columns: test(Category) and target (continous)."""
         ci = []
-        col_list = pd.DataFrame(df.iloc[:,0].value_counts(normalize=True)>0.001).reset_index()#Get only cat values that occur at least 0.001% of the time
+        col_list = pd.DataFrame(df.iloc[:,0].value_counts(normalize=True)>occurance).reset_index()#Get only cat values that occur at least 1% of the time
         col_list = col_list[col_list.iloc[:,1] == True].iloc[:,0]
+        print(len(col_list))
+        if len(col_list) < 1:
+            return ci
         for cat in col_list: #Accessing all unique categories, running all groupings of contious variables though test.
             data = df[df.iloc[:0] == cat].iloc[:,1]
             a = 1.0 * np.array(data)
@@ -162,13 +180,13 @@ class continuous_target(stats_package):
         return ci
 
     def ci_test(self):
-        """Preforms confidence interval test on columns with greater than 100 values"""
+        """Preforms confidence interval test on columns with greater than 120 values"""
         removed_cols = []
         for col in self.cat_cols:
             print(f"CI TEST FOR {col}")
             if self.df[col].count() >= 120:# 130 was chosen because you need at least 30 values per cat and at least 100 values per column. 
-                ci = continuous_target.mean_confidence_interval(self.df[[self.target, col]])
-                if ci != []:
+                ci = continuous_target.mean_confidence_interval(self.df[[col, self.target]])
+                if len(ci) > 1:
                     maxs = []
                     mins = []
                     totals = []
@@ -185,6 +203,7 @@ class continuous_target(stats_package):
                         removed_cols.append(col)
                 else:
                     removed_cols.append(col)
+                    self.dropped_cols_stats.update({col:0})
 
         self.df.drop(columns=removed_cols, inplace=True)
         [self.cat_cols.remove(item) for item in removed_cols]
