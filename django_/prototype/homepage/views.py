@@ -2,7 +2,11 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 def home(request):
-    return HttpResponse("<h1>TunaAI Homepage")
+    context = {
+        'posts': posts
+    }
+    return render(request, 'homepage/home.html')
+
 
 def about(request):
-    return HttpResponse("<h1>TunaAI About Page")
+    return render(request, 'homepage/about.html')
