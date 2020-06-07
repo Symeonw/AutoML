@@ -30,13 +30,14 @@ test.clear_over_correlated_columns()
 test.lin_corr_test()
 test.ci_test()
 end = time.time()
-print(end - start, " Stats")
+print(end - start, " Stats") 
 
 
 test.dropped_cols_stats
 df.columns
-df2 = test.df
+df = test.df
 df.assessmentyear.value_counts()
+df2.columns
 
 t = []
 for col in df2.columns:
