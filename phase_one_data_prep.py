@@ -21,7 +21,7 @@ class phase_one_data_prep:
         self.user_id = user_id
         self.user_column_label = user_column_label
         self.target = user_target_label
-        self.df[self.target].dropna(inplace=True)
+        self.df.dropna(subset= [self.target], inplace=True)
 #TODO: create cont_cols and cat_cols list as in stats_package. 
 
     def assign_column_types(self):

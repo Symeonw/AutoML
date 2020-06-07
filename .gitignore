@@ -1,0 +1,10 @@
+local_files/
+env.py
+env/
+.ipynb_checkpoints/
+__pycache__
+.DS_Store
+Thumbs.db
+.vscode/
+the.kids
+test_data/
