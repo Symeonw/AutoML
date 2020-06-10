@@ -8,7 +8,7 @@ from itertools import combinations
     #cont_cols
     #cat_cols
     #dropped_cols_stats - [(0, Dropped at CI Test), (1, Dropped at Correlation Test), 
-        #(2, Dropped due at Chi-Squared Test), (3, Dropped at Linear Correlation test),
+        #(2, Dropped due at Chi-Squared Test), (3, Dropped at Linear Correlation test)
 
 class stats_package:
 

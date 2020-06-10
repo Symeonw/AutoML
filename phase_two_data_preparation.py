@@ -23,7 +23,6 @@ class phase_two_data_prep:
         self.df = self.df.loc[x,:]
         self.cat_cols = list(set(self.df.columns).intersection(self.cat_cols))
         self.cont_cols = list(set(self.df.columns).intersection(self.cont_cols))
-        self.df.dropna(subset=[self.target], inplace=True)
 
     def prep_cats(self):
         cat = self.df[self.cat_cols]# Gets dataframe with all categorial columns
@@ -40,6 +39,8 @@ class phase_two_data_prep:
         self.df.drop(columns = self.cont_cols, inplace=True)# Removes non-scaled columns
         self.df = pd.concat([self.df, cols], axis=1)# Replaces non-scaled columns with scaled columns
 
+    def final_clean(self):
+        self.df.dropna(subset=[self.target], inplace=True)
 
 
 
@@ -51,3 +52,4 @@ class phase_two_data_prep:
 # x.prep_nans()
 # x.prep_cats()
 # x.prep_conts()
+

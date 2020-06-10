@@ -10,14 +10,14 @@ pd.set_option('display.float_format', lambda x: '%.3f' % x)
 
 import time
 start = time.time()
-df, labels = data_validation("test_data/cat_target/internet_usage.csv")
+df_internal, labels = data_validation("test_data/cat_target/internet_usage.csv")
 end = time.time()
 print(end - start)
 
 
 start = time.time()
 user_input = [0,0,1,0,1,0,1,1]
-phase_one = pop(df, "f54654", user_input, "target")
+phase_one = pop(df_internal, "f54654", user_input, "target")
 phase_one.execute_phase_one()
 end = time.time()
 print(end - start)
@@ -31,9 +31,13 @@ end = time.time()
 print(end - start, " Stats") 
 
 start = time.time()
-x = phase_two_data_prep(df, test.cat_cols, test.cont_cols)
+x = phase_two_data_prep(test.df, test.cat_cols, test.cont_cols, phase_one.target)
 x.prep_nans()
 x.prep_conts()
+x.prep_cats()
+x.final_clean()
 print(end - start, " Stats")
 
 
+test.cat_cols
+test.df
