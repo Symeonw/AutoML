@@ -42,7 +42,8 @@ class categorical_target(machine_learning):
     def split_data(self):
         X = self.df.drop(columns=self.target)
         y = self.df[self.target]
-        X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.25, random_state=123, stratify=y)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X,y,test_size=.25, random_state=123, stratify=y)
+        del self.df
 
 
     def model_selection(self):
@@ -54,8 +55,8 @@ class categorical_target(machine_learning):
             self.type = 1
 
     def build_model(self):
-        self.model.fit(X_train, y_train)
-        mscore = self.model.score(X_train, y_train)
+        self.model.fit(self.X_train, self.y_train)
+        mscore = self.model.score(self.X_train, self.y_train)
         self.score.update({100: mscore})
 
     def round_one_grid_seach(self):
@@ -66,9 +67,9 @@ class categorical_target(machine_learning):
         "min_child_weight" : [.01, .1, 1]
         }
         grid_search = GridSearchCV(self.model, params, cv = 4, scoring="accuracy")
-        grid_search.fit(X_train, y_train)
+        grid_search.fit(self.X_train, self.y_train)
         estimators = grid_search.best_estimator_
-        escore = estimators.score(X_train, y_train)
+        escore = estimators.score(self.X_train, self.y_train)
         self.score.update({200: escore})
         self.rogs = grid_search.best_params_
         if self.type == 0:
@@ -87,9 +88,9 @@ class categorical_target(machine_learning):
         "min_child_weight" : [.01, .1, 1]
                     }
         grid_search = GridSearchCV(self.model, params, cv = 4, scoring="accuracy")
-        grid_search.fit(X_train, y_train)
+        grid_search.fit(self.X_train, self.y_train)
         estimators = grid_search.best_estimator_
-        escore = estimators.score(X_train, y_train)
+        escore = estimators.score(self.X_train, self.y_train)
         self.score.update({300: escore})
         self.rtgs = grid_search.best_params_
         if self.type == 0:
@@ -104,16 +105,10 @@ class categorical_target(machine_learning):
                         min_child_weight=self.rtgs.get("min_child_weight"))
 
     def final(self):
-        score = self.model.fit(X_train, y_train)
-        score = self.model.score(X_test, y_test)
+        self.model.fit(self.X_train, self.y_train)
+        score = self.model.score(self.X_test, self.y_test)
         print(score)
 
 
-final = categorical_target(x.df, test.target)
-final.split_data()
-final.model_selection()
-final.build_model()
-final.round_one_grid_seach()
-final.round_two_grid_search()
-final.final()
+
 

@@ -25,13 +25,13 @@ class phase_two_data_prep:
         self.cont_cols = list(set(self.df.columns).intersection(self.cont_cols))
 
     def prep_cats(self):
-        cat = self.df[self.cat_cols]# Gets dataframe with all categorial columns
+        cat = self.df[[self.cat_cols]]# Gets dataframe with all categorial columns
         cols = pd.get_dummies(cat)# Does OneHotEncoding
         self.df.drop(columns=self.cat_cols, inplace=True)# Drops non-encoded columns from dataframe
         self.df = pd.concat([self.df, cols], axis=1)# Replaces dropped cols with encoded ones
 
     def prep_conts(self):
-        cont = self.df[self.cont_cols]# Gets dataframe with all continuous columns
+        cont = self.df[[self.cont_cols]]# Gets dataframe with all continuous columns
         scaler = MinMaxScaler()# Initiates MinMaxScaler
         cols = scaler.fit_transform(cont)# Scales columns
         cols = pd.DataFrame(cols)

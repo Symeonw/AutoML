@@ -32,18 +32,26 @@ class phase_one_data_prep:
         df_types.columns = ["column_name", "dtype"]
         df_types.dtype = df_types.dtype.astype(str)
         self.column_dtypes = {list(df_types.column_name)[i]: list(df_types.dtype)[i] for i in range(len(df_types))}
+        self.cont_cols = list({key:value for (key,value) in self.column_dtypes.items() if value == "float64" if key != self.target}.keys())
+        self.cat_cols = list({key:value for (key,value) in self.column_dtypes.items() if value == "category" if key != self.target}.keys())
+        
+
+    def handel_id(self):
+        tid = test.df.columns[self.user_column_label.index(2)]
+        self.df.drop(columns=tid, inplace=True)
+            
 
 
     def handel_nans(self):
         """Drops all columns with over 50% Nans unless they have at least 50 values"""
         col_nan_pct = self.df.isin([' ',np.nan]).mean() #Calculates percent of Nans
-        col_names = col_nan_pct[col_nan_pct >= .1].index # Gets name of columns with over 50% Nans
+        col_names = col_nan_pct[col_nan_pct >= .5].index # Gets name of columns with over 50% Nans
         col_count = [self.df[col].count() for col in col_names for x in self.df if x == col]  #Gets length of valid values for column
         dropped_col = [col for col in zip(col_count, col_names) if col[0] <= 1400] #Gets columns names with under 50 values
         [self.df.drop(columns=[col[1]], inplace=True) for col in dropped_col]
         self.dropped_cols_phase_one = dropped_col
-        [self.column_dtypes.pop(item[1]) for item in dropped_col]
-    
+        self.cat_cols = [self.cat_cols.remove(x) for x in dropped_col if (x in dropped_col) & (x in self.cat_cols)]
+        self.cont_cols = [self.cont_cols.remove(x) for x in dropped_col if (x in dropped_col) & (x in self.cont_cols)]
 
     def modified_zscore(col):
         """Makes calulations for Modified Z-Score"""
@@ -59,8 +67,8 @@ class phase_one_data_prep:
         that value is removed and the remaining values are tested for outliers with any outside 3 Modified Z-Score."""
         col_list = [] # This will hold the column names created for the administration of the modified z-score test
         values_dropped = []
-        cont_cols = self.df.select_dtypes(exclude=["category"]).columns # Gets continous columns  
-        for col in cont_cols:
+        for col in self.cont_cols:
+            print(self.df)
 #TODO: Add lines to check column len(), if len() == 0, drop drop column, create cont_cols and cat_cols, and drop from there as well. 
             df_len = len(self.df)
             top_value = self.df[col].value_counts(normalize=True, ascending=False, dropna=True)
@@ -86,13 +94,5 @@ class phase_one_data_prep:
         self.assign_column_types()
         self.handel_nans()
         self.identify_and_handel_outliers()
-
-
-
-# test = phase_one_data_prep(df, "AFH6G7W", user_column_input, "Age")
-
-# test.assign_column_types()
-# test.handel_nans()
-# test.dropped_cols_phase_one
-# test.identify_and_handel_outliers()
-# test.outliers_dropped
+        if any(self.user_column_label) == 2:
+            self.handel_id()

@@ -12,15 +12,15 @@ from itertools import combinations
 
 class stats_package:
 
-    def __init__(self, data_file, column_dtypes, user_target_label):
+    def __init__(self, data_file, column_dtypes, user_target_label, cont_cols, cat_cols):
         self.df = data_file
 
 class categorical_target(stats_package):
-    def __init__(self, data_file, column_dtypes, user_target_label):
-        super().__init__(data_file, column_dtypes, user_target_label)
+    def __init__(self, data_file, column_dtypes, user_target_label, cont_cols, cat_cols):
+        super().__init__(data_file, column_dtypes, user_target_label, cont_cols, cat_cols)
+        self.cont_cols = cont_cols
+        self.cat_cols = cat_cols
         self.target = user_target_label
-        self.cont_cols = list({key:value for (key,value) in column_dtypes.items() if value == "float64" if key != user_target_label}.keys())
-        self.cat_cols = list({key:value for (key,value) in column_dtypes.items() if value == "category" if key != user_target_label}.keys())
         self.dropped_cols_stats = {}
 
     def mean_confidence_interval(df:"two column dataframe", confidence=0.90):
@@ -79,12 +79,12 @@ class categorical_target(stats_package):
         self.df.drop(columns = removed_cols, inplace=True)
         [self.cont_cols.remove(item) for item in removed_cols]
 
-    def create_chi_table():
+    def create_chi_table(df):
         """Created chi table for scoring"""
         p = np.array([0.995, 0.99, 0.975, 0.95, 0.90, 0.10, 0.05, 0.025, 0.01, 0.005])
-        df = np.array(list(range(1, 30)) + list(range(30, 101, 10))).reshape(-1, 1)
+        dfi = np.array(list(range(1,len(df))) + list(range(30, 101, 10))).reshape(-1, 1)
         np.set_printoptions(linewidth=130, formatter=dict(float=lambda x: "%7.3f" % x))
-        table = chi2.isf(p, df)
+        table = chi2.isf(p, dfi)
         return table
 
 
@@ -96,18 +96,18 @@ class categorical_target(stats_package):
             chi2, p, dof, expected = chi2_contingency(chi_inp.values)
             if np.array(i >= 5 for i in expected).all() == False:
                 continue
-            if categorical_target.create_chi_table()[dof-1][6] > chi2 or p > .05 :
+            if categorical_target.create_chi_table(self.df)[dof-1][6] > chi2 or p > .05 :
                 removed_cols.append(col)
                 self.dropped_cols_stats.update({col:2})
         [self.cat_cols.remove(item) for item in removed_cols]
         self.df.drop(columns=removed_cols,inplace=True)
             
 class continuous_target(stats_package):
-    def __init__(self, data_file, column_dtypes, user_target_label):
-        super().__init__(data_file, column_dtypes, user_target_label)
+    def __init__(self, data_file, column_dtypes, user_target_label, cont_cols, cat_cols):
+        super().__init__(data_file, column_dtypes, user_target_label, cont_cols, cat_cols)
         self.target = user_target_label
-        self.cont_cols = list({key:value for (key,value) in column_dtypes.items() if value == "float64" if key != user_target_label}.keys())
-        self.cat_cols = list({key:value for (key,value) in column_dtypes.items() if value == "category" if key != user_target_label}.keys())
+        self.cont_cols = cont_cols
+        self.cat_cols = cat_cols
         self.dropped_cols_stats = {}
 
     def clear_over_correlated_columns(self):
