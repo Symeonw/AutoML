@@ -13,6 +13,7 @@ from scipy.stats import median_absolute_deviation as MAD
 # self.column_dtypes
 # self.dropped_cols_phase_one
 # self.outliers_dropped: Amount of rows dropped due to outliers occuring in a given column. 
+# dropped_cols_stats (4, dropped at NAN)
 
 class phase_one_data_prep:
 
@@ -22,6 +23,7 @@ class phase_one_data_prep:
         self.user_column_label = user_column_label
         self.target = user_target_label
         self.df.dropna(subset= [self.target], inplace=True)
+        self.dropped_cols_stats = {}
 #TODO: create cont_cols and cat_cols list as in stats_package. 
 
     def assign_column_types(self):
@@ -40,18 +42,17 @@ class phase_one_data_prep:
         tid = test.df.columns[self.user_column_label.index(2)]
         self.df.drop(columns=tid, inplace=True)
             
-
-
     def handel_nans(self):
         """Drops all columns with over 50% Nans unless they have at least 50 values"""
         col_nan_pct = self.df.isin([' ',np.nan]).mean() #Calculates percent of Nans
         col_names = col_nan_pct[col_nan_pct >= .5].index # Gets name of columns with over 50% Nans
-        col_count = [self.df[col].count() for col in col_names for x in self.df if x == col]  #Gets length of valid values for column
-        dropped_col = [col for col in zip(col_count, col_names) if col[0] <= 1400] #Gets columns names with under 50 values
-        [self.df.drop(columns=[col[1]], inplace=True) for col in dropped_col]
-        self.dropped_cols_phase_one = dropped_col
-        self.cat_cols = [self.cat_cols.remove(x) for x in dropped_col if (x in dropped_col) & (x in self.cat_cols)]
-        self.cont_cols = [self.cont_cols.remove(x) for x in dropped_col if (x in dropped_col) & (x in self.cont_cols)]
+        # col_count = [self.df[col].count() for col in col_names for x in self.df if x == col]  #Gets length of valid values for column
+        # dropped_col = [col_n for col_c, col_n in zip(col_count, col_names) if col[0] <= 1400] #Gets columns names with under 500 values
+            # Could be introduced for purley feature importance testing
+        [self.df.drop(columns=[col], inplace=True) for col in col_names]
+        [self.dropped_cols_stats.update({4:names}) for names in col_names]
+        [self.cat_cols.remove(x) for x in list(set(self.cat_cols).intersection(set(col_names)))]
+        [self.cont_cols.remove(x) for x in list(set(self.cont_cols).intersection(set(col_names)))]
 
     def modified_zscore(col):
         """Makes calulations for Modified Z-Score"""
@@ -68,7 +69,6 @@ class phase_one_data_prep:
         col_list = [] # This will hold the column names created for the administration of the modified z-score test
         values_dropped = []
         for col in self.cont_cols:
-            print(self.df)
 #TODO: Add lines to check column len(), if len() == 0, drop drop column, create cont_cols and cat_cols, and drop from there as well. 
             df_len = len(self.df)
             top_value = self.df[col].value_counts(normalize=True, ascending=False, dropna=True)
@@ -96,3 +96,7 @@ class phase_one_data_prep:
         self.identify_and_handel_outliers()
         if any(self.user_column_label) == 2:
             self.handel_id()
+
+
+
+
